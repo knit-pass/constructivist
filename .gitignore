@@ -1,0 +1,5 @@
+.google-cookie
+**/__pycache__/
+logs/
+.pywikigraph
+*.env
