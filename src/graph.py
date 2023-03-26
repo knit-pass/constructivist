@@ -5,6 +5,7 @@ from dotenv import load_dotenv, dotenv_values
 from .wikipedia import *
 
 
+
 class App:
     def __init__(self, uri, user, password):
         self.driver = GraphDatabase.driver(uri, auth=(user, password))
@@ -36,6 +37,8 @@ class App:
             raise
 
     # ------ Functions to create category and link it to user profile(KNOWS) ----- #
+    
+    
     def __create_category(self, category):
         with self.driver.session(database="neo4j") as session:
             result = session.execute_write(
@@ -110,48 +113,66 @@ class App:
         print("Topic created: ", topic, " : ", category)
 
     # ------- Functions to link topics to the Categories through sub-topics ------ #
-    def __create_topic_relation(self, topic, category):
+    def __create_topic_relation(self, topic):
         with self.driver.session(database="neo4j") as session:
             result = session.execute_write(
-                self.__create_topic_relation_driver, topic=topic, category=category
+                self.__create_topic_relation_driver, topic=topic
             )
             return [row for row in result]
 
     @staticmethod
-    def __create_topic_relation_driver(tx, topic, category):
+    def __create_topic_relation_driver(tx, topic):
         global user_profile
         # Creating a topic node with the name of the topic.
         result = []
-        topic_wiki_page = get_nearest_wiki_links(topic)[0]
-        category_wiki_page = get_nearest_wiki_links(category)[0]
-        shortest_path = get_shortest_path(topic_wiki_page, category_wiki_page)
-        if shortest_path[0] == 1:
-            query = (
+        # topic_wiki_page = get_nearest_wiki_links(topic)[0]
+        # category_wiki_page = get_nearest_wiki_links(category)[0]    
+        # shortest_path = get_shortest_path(topic_wiki_page, category_wiki_page)
+        query = (
                 "MATCH (c:Category {name : $category})"
                 "MERGE (t:Topic {name : $topic})"
-                "MERGE (c)<-[:BELONGSTO {level :1}]-(t)"
+                "MERGE (c)<-[:BELONGSTO]-(t)"
             )
-            result = tx.run(query, topic=topic_wiki_page, category=category)
-        elif shortest_path[0] == 2:
-            query = (
-                "MATCH (c:Category {name : $category})"
-                "MERGE (t:Topic {name : $topic})"
-                "MERGE (c)<-[:BELONGSTO {level :2}]-(t)"
-            )
-            result = tx.run(query, topic=topic_wiki_page, category=category)
-        try:
-            return [row for row in result]
-        # Capture any errors along with the query and data for traceability
-        except ServiceUnavailable as exception:
-            logging.error(
+        
+        categories_fetched_with_percentage = [
+            {
+                "category": "Entertainment",
+                "percentage": 80.0
+            },
+            {
+                "category": "Film",
+                "percentage": 50.0
+            },
+            {
+                "category": "Mass media",
+                "percentage": 35.0
+            },
+            {
+                "category": "Television",
+                "percentage": 32.0
+            }
+            ]
+        categories_fetched = []
+        for i in categories_fetched_with_percentage:
+            categories_fetched.append(i["category"])
+        print(categories_fetched)
+
+        for i in categories_fetched:
+            print(i)
+            result = tx.run(query, topic=topic, category=i)
+            try:
+                 print()
+            except ServiceUnavailable as exception:
+                logging.error(
                 "{query} raised an error: \n {exception}".format(
                     query=query, exception=exception
+                  )
                 )
-            )
 
-    def create_new_topic_relation(self, topic, category):
-        self.__create_topic_relation(topic, category)
-        print("Topic created: ", topic, " : ", category)
+        return [row for row in result]
+    def create_new_topic_relation(self, topic):
+        self.__create_topic_relation(topic)
+        print("Topic created: ", topic, " : ")
 
 
 creds = dotenv_values("neo4j_credentials.env")
@@ -191,7 +212,6 @@ categories = [
     "Mathematics",
     "Military",
     "Nature",
-    "Person",
     "Philosophy",
     "Politics",
     "Religion",
@@ -205,11 +225,11 @@ categories = [
 
 
 def main_graph_test():
-    topic = "Alan Turing"
+    topic = "Tom Cruise"
     for i in categories:
         app.create_new_category(i)
-    for i in categories:
-        app.create_new_topic_relation(topic, i)
+    
+    app.create_new_topic_relation(topic)
     app.close()
 
 
