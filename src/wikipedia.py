@@ -1,5 +1,5 @@
 import requests
-from pywikigraph import WikiGraph
+from .pywikigraph import WikiGraph
 
 wg = WikiGraph()
 
