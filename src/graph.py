@@ -2,8 +2,9 @@ from neo4j import GraphDatabase
 import logging
 from neo4j.exceptions import ServiceUnavailable
 from dotenv import load_dotenv, dotenv_values
-from .wikipedia import *
 
+# from .wikipedia import *
+import json
 
 
 class App:
@@ -37,8 +38,7 @@ class App:
             raise
 
     # ------ Functions to create category and link it to user profile(KNOWS) ----- #
-    
-    
+
     def __create_category(self, category):
         with self.driver.session(database="neo4j") as session:
             result = session.execute_write(
@@ -126,50 +126,46 @@ class App:
         # Creating a topic node with the name of the topic.
         result = []
         # topic_wiki_page = get_nearest_wiki_links(topic)[0]
-        # category_wiki_page = get_nearest_wiki_links(category)[0]    
+        # category_wiki_page = get_nearest_wiki_links(category)[0]
         # shortest_path = get_shortest_path(topic_wiki_page, category_wiki_page)
         query = (
-                "MATCH (c:Category {name : $category})"
-                "MERGE (t:Topic {name : $topic})"
-                "MERGE (c)<-[:BELONGSTO]-(t)"
-            )
-        
-        categories_fetched_with_percentage = [
-            {
-                "category": "Entertainment",
-                "percentage": 80.0
-            },
-            {
-                "category": "Film",
-                "percentage": 50.0
-            },
-            {
-                "category": "Mass media",
-                "percentage": 35.0
-            },
-            {
-                "category": "Television",
-                "percentage": 32.0
-            }
-            ]
+            "MATCH (c:Category {name : $category})"
+            "MERGE (t:Topic {name : $topic})"
+            "MERGE (c)<-[:BELONGSTO {value : $value}]-(t)"
+        )
+        category_file_path = "data/category.json"
+        if __name__ == "__main__":
+            category_file_path = "../data/category.json"
+
+        with open(category_file_path, "r") as file:
+            categories_fetched_with_percentage = json.load(file)
+
+        print(categories_fetched_with_percentage)
         categories_fetched = []
+
         for i in categories_fetched_with_percentage:
-            categories_fetched.append(i["category"])
+            categories_fetched.append(i)
         print(categories_fetched)
 
         for i in categories_fetched:
             print(i)
-            result = tx.run(query, topic=topic, category=i)
+            result = tx.run(
+                query,
+                topic=topic,
+                category=i["category"],
+                value=float(i["percentage"]) / 100,
+            )
             try:
-                 print()
+                print(result)
             except ServiceUnavailable as exception:
                 logging.error(
-                "{query} raised an error: \n {exception}".format(
-                    query=query, exception=exception
-                  )
+                    "{query} raised an error: \n {exception}".format(
+                        query=query, exception=exception
+                    )
                 )
 
         return [row for row in result]
+
     def create_new_topic_relation(self, topic):
         self.__create_topic_relation(topic)
         print("Topic created: ", topic, " : ")
@@ -228,7 +224,6 @@ def main_graph_test():
     topic = "Tom Cruise"
     for i in categories:
         app.create_new_category(i)
-    
     app.create_new_topic_relation(topic)
     app.close()
 

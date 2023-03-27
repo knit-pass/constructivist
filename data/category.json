@@ -1,0 +1,18 @@
+[
+    {
+        "category": "Entertainment",
+        "percentage": 80.0
+    },
+    {
+        "category": "Film",
+        "percentage": 50.0
+    },
+    {
+        "category": "Mass media",
+        "percentage": 35.0
+    },
+    {
+        "category": "Television",
+        "percentage": 32.0
+    }
+]
