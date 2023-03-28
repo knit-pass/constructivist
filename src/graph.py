@@ -119,7 +119,49 @@ class App:
                 self.__create_topic_relation_driver, topic=topic
             )
             return [row for row in result]
+        
+    def __assign_weights(self):
+        with self.driver.session(database='neo4j') as session:
+            result = session.execute_write(
+                self.__assign_weights_driver
+            )
+            return [row for row in result]
 
+    def __normalize_weights(self):
+        with self.driver.session(database='neo4j') as session:
+            result = session.execute_write(
+                self.__normalize_weights_driver
+            )
+            return [row for row in result]
+
+    @staticmethod
+    def __assign_weights_driver(tx):
+        global user_profile
+        result = []
+        query = (
+            "MATCH (n:Category)<-[r:BELONGSTO]-(otherNode)"
+            "WITH n,SUM(r.value) AS weight"
+            "SET n.weight = weight"
+            "RETURN weight"
+        )
+        result = tx.run(query)
+        return result
+
+    @staticmethod
+    def __normalize_weights_driver(tx):
+        global user_profile
+        result = []
+        
+        query = (
+            "MATCH (n:Profile)-[r:KNOWS]->(Category)"
+            "WITH n,max(Category.weight) as max_weight"
+            "MATCH(c:Category)"
+            "SET c.normalized_weight =(c.weight)/max_weight"
+            "RETURN normalized_weight"
+        )
+        result = tx.run(query)
+        return result
+    
     @staticmethod
     def __create_topic_relation_driver(tx, topic):
         global user_profile
@@ -165,10 +207,16 @@ class App:
                 )
 
         return [row for row in result]
-
+    
     def create_new_topic_relation(self, topic):
         self.__create_topic_relation(topic)
         print("Topic created: ", topic, " : ")
+    def assign_weights(self):
+        self.__assign_weights()
+        print("Weights Assigned")
+    def normalize_weights(self):
+        self.__normalize_weights()
+        print("Weights Normalized")
 
 
 creds = dotenv_values("neo4j_credentials.env")
@@ -221,10 +269,12 @@ categories = [
 
 
 def main_graph_test():
-    topic = "Tom Cruise"
+    topic = "Narendra Modi"
     for i in categories:
         app.create_new_category(i)
     app.create_new_topic_relation(topic)
+    # app.assign_weights()
+    # app.normalize_weights()
     app.close()
 
 
