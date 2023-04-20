@@ -125,23 +125,23 @@ class App:
             result = session.execute_write(
                 self.__assign_weights_driver
             )
-            return [row for row in result]
+            return
 
     def __normalize_weights(self):
         with self.driver.session(database='neo4j') as session:
             result = session.execute_write(
                 self.__normalize_weights_driver
             )
-            return [row for row in result]
+            return 
 
     @staticmethod
     def __assign_weights_driver(tx):
         global user_profile
         result = []
         query = (
-            "MATCH (n:Category)<-[r:BELONGSTO]-(otherNode)"
-            "WITH n,SUM(r.value) AS weight"
-            "SET n.weight = weight"
+            "MATCH (n:Category)<-[r:BELONGSTO]-(otherNode) "
+            "WITH n,SUM(r.value) AS weight "
+            "SET n.weight = weight "
             "RETURN weight"
         )
         result = tx.run(query)
@@ -153,11 +153,11 @@ class App:
         result = []
         
         query = (
-            "MATCH (n:Profile)-[r:KNOWS]->(Category)"
-            "WITH n,max(Category.weight) as max_weight"
-            "MATCH(c:Category)"
-            "SET c.normalized_weight =(c.weight)/max_weight"
-            "RETURN normalized_weight"
+            "MATCH (n:Profile)-[r:KNOWS]->(Category) "
+            "WITH n,max(Category.weight) as max_weight "
+            "MATCH(c:Category) "
+            "SET c.normalized_weight =(c.weight)/max_weight "
+            "RETURN c.normalized_weight"
         )
         result = tx.run(query)
         return result
@@ -269,12 +269,12 @@ categories = [
 
 
 def main_graph_test():
-    topic = "Narendra Modi"
+    topic = "RAM"
     for i in categories:
         app.create_new_category(i)
     app.create_new_topic_relation(topic)
-    # app.assign_weights()
-    # app.normalize_weights()
+    app.assign_weights()
+    app.normalize_weights()
     app.close()
 
 
