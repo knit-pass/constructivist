@@ -1,5 +1,7 @@
+import json
 import requests
 from .pywikigraph import WikiGraph
+from .graph import categories
 
 wg = WikiGraph()
 
@@ -23,6 +25,34 @@ def get_nearest_wiki_links(keyword):
     return data
 
 
+def get_shortest_path_details(source: str, dest: str) -> None:
+    data = get_shortest_path(source, dest)
+    # print(data)
+    return [dest, data[0], data[1]]
+
+
+def get_categories_sp(source: str):
+    data = []
+    for i in categories:
+        data.append(get_shortest_path_details(source, i))
+    min = 5
+    for i in data:
+        if i[1] < min:
+            min = i[1]
+    data_selected = []
+    for i in data:
+        if i[1] == min:
+            data_selected.append(i)
+    data_sorted = sorted(data_selected, key=lambda i: i[2], reverse=True)
+    with open(f"data_{source}.json", "w") as f:
+        json.dump(data_sorted, f)
+    print("Data written.")
+    return data_sorted
+
+
+def wiki_test():
+    get_categories_sp("Elon Musk")
+
+
 if __name__ == "__main__":
-    # shortest_path_test():
-    print(get_nearest_wiki_links("Python"))
+    pass

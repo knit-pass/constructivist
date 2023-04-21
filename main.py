@@ -2,9 +2,8 @@ from src import *
 
 
 def main():
-    main_graph_test()
+    wiki_test()
 
 
 if __name__ == "__main__":
-    main()  
-
+    main()
