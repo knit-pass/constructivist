@@ -31,6 +31,10 @@ def get_shortest_path_details(source: str, dest: str) -> None:
     return [dest, data[0], data[1]]
 
 
+def compare(item):
+    return (item[1], -item[2])
+
+
 def get_categories_sp(source: str):
     data = []
     for i in categories:
@@ -41,9 +45,9 @@ def get_categories_sp(source: str):
             min = i[1]
     data_selected = []
     for i in data:
-        if i[1] == min:
+        if i[1] == min or i[1] == min + 1:
             data_selected.append(i)
-    data_sorted = sorted(data_selected, key=lambda i: i[2], reverse=True)
+    data_sorted = sorted(data_selected, key=compare)
     with open(f"data_{source}.json", "w") as f:
         json.dump(data_sorted, f)
     print("Data written.")
@@ -51,7 +55,12 @@ def get_categories_sp(source: str):
 
 
 def wiki_test():
-    get_categories_sp("Elon Musk")
+    get_categories_sp("Amazon rainforest")
+    get_categories_sp("Hinduism")
+    get_categories_sp("Algorithm")
+    get_categories_sp("Twitter")
+    get_categories_sp("Narendra Modi")
+    get_categories_sp("Marcus Aurelius")
 
 
 if __name__ == "__main__":
