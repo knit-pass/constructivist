@@ -1,18 +1,30 @@
 [
     {
-        "category": "Entertainment",
-        "percentage": 80.0
+        "category": "Technology",
+        "percentage": 30
     },
     {
-        "category": "Film",
-        "percentage": 50.0
+        "category": "Computer Hardware",
+        "percentage": 70
     },
     {
-        "category": "Mass media",
-        "percentage": 35.0
+        "category": "Electronics",
+        "percentage": 40
     },
     {
-        "category": "Television",
-        "percentage": 32.0
+        "category": "Information",
+        "percentage": 20
+    },
+    {
+        "category": "Internet",
+        "percentage": 10
+    },
+    {
+        "category": "Science",
+        "percentage": 10
+    },
+    {
+        "category": "Engineering",
+        "percentage": 20
     }
 ]

@@ -53,6 +53,10 @@ class App:
             "MATCH (u:Profile)"
             f"WHERE u.name = '{user_profile}'"
             "MERGE (u)-[r:KNOWS]->(t:Category {name : $category})"
+            "MERGE (t)-[:HAS]->(:Level {name: 'Level1'})"
+            "MERGE (t)-[:HAS]->(:Level {name: 'Level2'})"
+            "MERGE (t)-[:HAS]->(:Level {name: 'Level3'})"
+            "MERGE (t)-[:HAS]->(:Level {name: 'Level4'})"
             "RETURN r"
         )
         result = tx.run(query, category=category)
@@ -113,10 +117,10 @@ class App:
         print("Topic created: ", topic, " : ", category)
 
     # ------- Functions to link topics to the Categories through sub-topics ------ #
-    def __create_topic_relation(self, topic):
+    def __create_topic_relation(self, topic,level):
         with self.driver.session(database="neo4j") as session:
             result = session.execute_write(
-                self.__create_topic_relation_driver, topic=topic
+                self.__create_topic_relation_driver, topic=topic,level = level
             )
             return [row for row in result]
         
@@ -139,11 +143,15 @@ class App:
         global user_profile
         result = []
         query = (
-            "MATCH (n:Category)<-[r:BELONGSTO]-(otherNode) "
-            "WITH n,SUM(r.value) AS weight "
-            "SET n.weight = weight "
+            "MATCH (l:Level)<-[r:BELONGSTO]-(otherNode) "
+            "WITH l,SUM(r.value) AS weight "
+            "SET l.weight = weight "
             "RETURN weight"
         )
+        # "MATCH (n:Category)<-[r:BELONGSTO]-(otherNode) "
+            # "WITH n,SUM(r.value) AS weight "
+            # "SET n.weight = weight "
+            # "RETURN weight"
         result = tx.run(query)
         return result
 
@@ -155,7 +163,6 @@ class App:
         query = (
             "MATCH (n:Profile)-[r:KNOWS]->(Category) "
             "WITH n,max(Category.weight) as max_weight "
-            "MATCH(c:Category) "
             "SET c.normalized_weight =(c.weight)/max_weight "
             "RETURN c.normalized_weight"
         )
@@ -163,21 +170,26 @@ class App:
         return result
     
     @staticmethod
-    def __create_topic_relation_driver(tx, topic):
+    def __create_topic_relation_driver(tx, topic,level):
         global user_profile
         # Creating a topic node with the name of the topic.
         result = []
         # topic_wiki_page = get_nearest_wiki_links(topic)[0]
         # category_wiki_page = get_nearest_wiki_links(category)[0]
         # shortest_path = get_shortest_path(topic_wiki_page, category_wiki_page)
-        query = (
-            "MATCH (c:Category {name : $category})"
-            "MERGE (t:Topic {name : $topic})"
-            "MERGE (c)<-[:BELONGSTO {value : $value}]-(t)"
+        query = ( 
+            "MATCH (c:Category {name : $category})-[:HAS]->(l:Level {name : $level})"
+            "MERGE (t:Topic {name : $topic})" 
+            "MERGE (l)<-[:BELONGSTO {value : $value}]-(t)"
         )
+        # query = (
+        #     "MATCH (c:Category {name : $category})"
+        #     "MERGE (t:Topic {name : $topic})"
+        #     "MERGE (c)<-[:BELONGSTO {value : $value}]-(t)"
+        # )
         category_file_path = "data/category.json"
         if __name__ == "__main__":
-            category_file_path = "../data/category.json"
+            category_file_path = "./data/category.json"
 
         with open(category_file_path, "r") as file:
             categories_fetched_with_percentage = json.load(file)
@@ -194,6 +206,7 @@ class App:
             result = tx.run(
                 query,
                 topic=topic,
+                level=level,
                 category=i["category"],
                 value=float(i["percentage"]) / 100,
             )
@@ -208,9 +221,9 @@ class App:
 
         return [row for row in result]
     
-    def create_new_topic_relation(self, topic):
-        self.__create_topic_relation(topic)
-        print("Topic created: ", topic, " : ")
+    def create_new_topic_relation(self, topic,level):
+        self.__create_topic_relation(topic,level)
+        print("Topic created: ", topic, " : ",level)
     def assign_weights(self):
         self.__assign_weights()
         print("Weights Assigned")
@@ -270,13 +283,18 @@ categories = [
 
 def main_graph_test():
     topic = "RAM"
+    level = "Level1"
     for i in categories:
         app.create_new_category(i)
-    app.create_new_topic_relation(topic)
+    app.create_new_topic_relation(topic,level)
     app.assign_weights()
-    app.normalize_weights()
+    # app.normalize_weights()
     app.close()
 
 
 if __name__ == "__main__":
     main_graph_test()
+
+# match (c:Category{name:"Entertainment"})-[:HAS]->(l:Level1)
+# create (t:Topic {name:"Tom Cruise"})
+# create (l)<-[:BELONGSTO {value : 10}]-(t)
