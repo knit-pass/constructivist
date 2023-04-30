@@ -142,17 +142,41 @@ class App:
     def __assign_weights_driver(tx):
         global user_profile
         result = []
-        query = (
-            "MATCH (l:Level)<-[r:BELONGSTO]-(otherNode) "
-            "WITH l,SUM(r.value) AS weight "
-            "SET l.weight = weight "
+        query1 = (
+            "MATCH (c:Category)-[:HAS]->(l:Level{name:'Level1'})<-[r:BELONGSTO]-(otherNode)"
+            "WITH c, l, SUM(r.value) AS weight "
+            "SET l.weight = weight, c.weight_level1 = weight "
             "RETURN weight"
         )
+        query2 = (
+            "MATCH (c:Category)-[:HAS]->(l:Level{name:'Level2'})<-[r:BELONGSTO]-(otherNode)"
+            "WITH c, l, SUM(r.value) AS weight "
+            "SET l.weight = weight, c.weight_level2 = weight "
+            "RETURN weight"
+        )
+        query3 = (
+            "MATCH (c:Category)-[:HAS]->(l:Level{name:'Level3'})<-[r:BELONGSTO]-(otherNode)"
+            "WITH c, l, SUM(r.value) AS weight "
+            "SET l.weight = weight, c.weight_level3 = weight "
+            "RETURN weight"
+        )
+        query4 = (
+            "MATCH (c:Category)-[:HAS]->(l:Level{name:'Level4'})<-[r:BELONGSTO]-(otherNode)"
+            "WITH c, l, SUM(r.value) AS weight "
+            "SET l.weight = weight, c.weight_level4 = weight "
+            "RETURN weight"
+        )
+
+
         # "MATCH (n:Category)<-[r:BELONGSTO]-(otherNode) "
             # "WITH n,SUM(r.value) AS weight "
             # "SET n.weight = weight "
             # "RETURN weight"
-        result = tx.run(query)
+        result = tx.run(query1)
+        result = tx.run(query2)
+        result = tx.run(query3)
+        result = tx.run(query4)
+        
         return result
 
     @staticmethod
@@ -160,12 +184,37 @@ class App:
         global user_profile
         result = []
         
+        # query = (
+        #     "MATCH (n:Profile)-[r:KNOWS]->(Category) "
+        #     "WITH n,max(Category.weight) as max_weight "
+        #     "SET c.normalized_weight =(c.weight)/max_weight "
+        #     "RETURN c.normalized_weight"
+        # )
+        # match(c:Category)
+        # WITH max(c.weight_level1) as max_weight
+        # match (c:Category)
+        # SET c.normalized_weight_level1 = c.weight_level1 / max_weight
+        # RETURN c.weight_level1, max_weight, c.normalized_weight_level1
+
+
         query = (
-            "MATCH (n:Profile)-[r:KNOWS]->(Category) "
-            "WITH n,max(Category.weight) as max_weight "
-            "SET c.normalized_weight =(c.weight)/max_weight "
-            "RETURN c.normalized_weight"
+            "MATCH (c:Category) "
+            "WITH MAX(c.weight_level1) as max_weight1, max(c.weight_level2) as max_weight2, "
+            "MAX(c.weight_level3) as max_weight3, max(c.weight_level4) as max_weight4 "
+            "MATCH (c:Category) "
+            "SET c.normalized_weight_level1 = c.weight_level1 / max_weight1, "
+            "c.normalized_weight_level2 = c.weight_level2 / max_weight2, "
+            "c.normalized_weight_level3 = c.weight_level3 / max_weight3, "
+            "c.normalized_weight_level4 = c.weight_level4 / max_weight4"
         )
+
+         # "RETURN c.name, c.weight_level1, c.weight_level2, c.weight_level3, c.weight_level4,"
+            #     "max_weight1, max_weight2, max_weight3, max_weight4,"
+            #     "c.normalized_weight_level1, c.normalized_weight_level2,"
+            #     "c.normalized_weight_level3, c.normalized_weight_level4"
+
+
+
         result = tx.run(query)
         return result
     
@@ -282,13 +331,13 @@ categories = [
 
 
 def main_graph_test():
-    topic = "RAM"
+    topic = "Leonardo DiCaprio"
     level = "Level1"
     for i in categories:
         app.create_new_category(i)
     app.create_new_topic_relation(topic,level)
     app.assign_weights()
-    # app.normalize_weights()
+    app.normalize_weights()
     app.close()
 
 
