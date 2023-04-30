@@ -1,3 +1,51 @@
+import openai
+openai.api_key = "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"
+
+def beginFunction():
+    print("# ---------------------------------------------------------------------------- #")
+    print("#                                Search Engine                                 #")
+    print("# ---------------------------------------------------------------------------- #\n")
+    
+    print("MENU : ")
+    print("1.Give modified prompt  2.Give solution  3.Exit\n")
+    
+    while True:
+        questionType = int(input("Enter 1/2/3 : "))
+
+        if(questionType == 3):
+            print("Thank you!! exiting...")
+            break
+
+        question = input("Enter prompt : ")
+
+        #call function to modify question using graph and store in newQuestion
+        modifiedQuestion = "This is a new sample prompt"
+        if(questionType == 1):
+            print("New Prompt : " + modifiedQuestion)
+        else :
+            solution = "This is a sample solution"
+            # solution = giveAnswer(modifiedQuestion) # uses API key
+            print("Solution : " + solution)
+        print("# ---------------------------------------------------------------------------- #")
+        print("\n")
+
+
+# this function uses API key to generate results
+def giveAnswer(message):
+    messages = [ {"role": "system", "content": 
+              "You are a intelligent assistant."} ]
+    if message:
+        messages.append(
+            {"role": "user", "content": message},
+        )
+        chat = openai.ChatCompletion.create(
+            model="gpt-3.5-turbo", messages=messages
+        )
+    reply = chat.choices[0].message.content
+    print(f"ChatGPT: {reply}")
+    messages.append({"role": "assistant", "content": reply})
+
+
 def choose_profiles(choice=0) -> str:
     if not choice:
         print("Choose: ")
@@ -76,5 +124,8 @@ def init_new_profile(name: str = "") -> bool:
         return init_new_profile(name)
 
 
+
 if __name__ == "__main__":
-    print("Chosen Profile: ", choose_profiles())
+    # print("Chosen Profile: ", choose_profiles())
+    # print(giveAnswer("who is narendra modi")) # function uses API key
+    beginFunction()
