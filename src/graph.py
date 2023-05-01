@@ -137,7 +137,12 @@ class App:
                 self.__normalize_weights_driver
             )
             return 
-
+    def __fetch_weights(self,category):
+        with self.driver.session(database = 'neo4j') as session:
+            result = session.execute_write(
+                self.__fetch_weights_driver,category = category
+            )
+            return result
     @staticmethod
     def __assign_weights_driver(tx):
         global user_profile
@@ -166,7 +171,6 @@ class App:
             "SET l.weight = weight, c.weight_level4 = weight "
             "RETURN weight"
         )
-
 
         # "MATCH (n:Category)<-[r:BELONGSTO]-(otherNode) "
             # "WITH n,SUM(r.value) AS weight "
@@ -217,7 +221,70 @@ class App:
 
         result = tx.run(query)
         return result
-    
+    @staticmethod
+    def __fetch_weights_driver(tx,category):
+        global user_profile
+
+        result = []
+        # query = (
+        #     "MATCH (c:Category)-[:HAS]->(l1:Level {name:'Level1'}) "
+        #     "MATCH (c:Category)-[:HAS]->(l2:Level {name:'Level2'}) "
+        #     "MATCH (c:Category)-[:HAS]->(l3:Level {name:'Level3'}) "
+        #     "MATCH (c:Category)-[:HAS]->(l4:Level {name:'Level4'}) "
+        #     "WHERE c.name = $category "
+        #     "RETURN c, l1, l2, l3, l4"
+        # )
+        query = (
+            "MATCH (c:Category{name:$category})"
+            "RETURN COALESCE(c.name) as name, "
+            "COALESCE(c.weight_level1,'null') as weight_level1, "
+            "COALESCE(c.weight_level2,'null') as weight_level2, "
+            "COALESCE(c.weight_level3,'null') as weight_level3, "
+            "COALESCE(c.weight_level4,'null') as weight_level4, "
+            "COALESCE(c.normalized_weight_level1,'null') as normalized_weight_level1, "
+            "COALESCE(c.normalized_weight_level2,'null') as normalized_weight_level2, "
+            "COALESCE(c.normalized_weight_level3,'null') as normalized_weight_level3, "
+            "COALESCE(c.normalized_weight_level4,'null') as normalized_weight_level4"
+        )
+
+        record = tx.run(query,category = category).single()
+        # data = {
+        #     "category": record["c"].get("name"),
+        #     "weight_level1": record["c"].get("weight_level1"),
+        #     "weight_level2": record["c"].get("weight_level2"),
+        #     "weight_level3": record["c"].get("weight_level3"),
+        #     "weight_level4": record["c"].get("weight_level4"),
+        #     "normalized_weight_level1": record["c"].get("normalized_weight_level1"),
+        #     "normalized_weight_level2": record["c"].get("normalized_weight_level2"),
+        #     "normalized_weight_level3": record["c"].get("normalized_weight_level3"),
+        #     "normalized_weight_level4": record["c"].get("normalized_weight_level4")
+        # }
+        data = {
+            "category": record["name"],
+            "weight_level1": record["weight_level1"],
+            "weight_level2": record["weight_level2"],
+            "weight_level3": record["weight_level3"],
+            "weight_level4": record["weight_level4"],
+            "normalized_weight_level1": record["normalized_weight_level1"],
+            "normalized_weight_level2": record["normalized_weight_level2"],
+            "normalized_weight_level3": record["normalized_weight_level3"],
+            "normalized_weight_level4": record["normalized_weight_level4"]
+        }
+        # "weight_level1": record[1],
+        #     "weight_level2": record[2],
+        #     "weight_level3": record[3],
+        #     "weight_level4": record[4],
+        #     "normalized_weight_level1": record[5],
+        #     "normalized_weight_level2": record[6],
+        #     "normalized_weight_level3": record[7],
+        #     "normalized_weight_level4": record[8]
+
+        fileName = "data/"+category+".json"
+        with open(fileName,'w') as f:
+            json.dump(data,f)
+        
+        return result
+        
     @staticmethod
     def __create_topic_relation_driver(tx, topic,level):
         global user_profile
@@ -279,6 +346,9 @@ class App:
     def normalize_weights(self):
         self.__normalize_weights()
         print("Weights Normalized")
+    def fetch_weights(self,category):
+        self.__fetch_weights(category)
+        print("Weights fetched : ",category)
 
 
 creds = dotenv_values("neo4j_credentials.env")
@@ -333,11 +403,13 @@ categories = [
 def main_graph_test():
     topic = "Leonardo DiCaprio"
     level = "Level1"
-    for i in categories:
-        app.create_new_category(i)
-    app.create_new_topic_relation(topic,level)
-    app.assign_weights()
-    app.normalize_weights()
+    category = "Entertainment"
+    # for i in categories:
+    #     app.create_new_category(i)
+    # app.create_new_topic_relation(topic,level)
+    # app.assign_weights()
+    # app.normalize_weights()
+    app.fetch_weights(category)
     app.close()
 
 
