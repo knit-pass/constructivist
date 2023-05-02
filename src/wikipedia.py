@@ -40,7 +40,7 @@ def get_semantic_percentage(domains):
     domain_counts = {}
     total_score = 0
     for domain in domains:
-        domain_counts[domain[0]] = (7000 * (1 / domain[1])) + (25 * domain[2])
+        domain_counts[domain[0]] = (7000 * (1 / domain[1])) + (50 * domain[2])
         total_score += domain_counts[domain[0]]
     domain_percentages = {}
     for domain in domain_counts:
@@ -62,7 +62,7 @@ def get_categories_sp(source: str):
     for i in data:
         if i[1] == min:
             data_selected_primary.append(i)
-        elif i[1] == min + 1 and i[2] > 2:
+        elif i[1] == min + 1 and i[2] > 10:
             data_selected_secondary.append(i)
     data_selected_secondary = sorted(data_selected_secondary, key=lambda s: s[2])
     data_selected = data_selected_primary
@@ -76,13 +76,9 @@ def get_categories_sp(source: str):
 
 
 def wiki_test():
-    get_categories_sp("Amazon rainforest")
-    get_categories_sp("Hinduism")
-    get_categories_sp("Algorithm")
-    get_categories_sp("Twitter")
-    get_categories_sp("Narendra Modi")
-    get_categories_sp("Marcus Aurelius")
+    get_categories_sp("Dark Web")
 
 
 if __name__ == "__main__":
+    wiki_test()
     pass

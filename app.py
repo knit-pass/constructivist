@@ -1,6 +1,8 @@
 import openai
-openai.api_key = "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"
+from dotenv import load_dotenv, dotenv_values
 
+creds = dotenv_values("chatgpt_credentials.env")
+openai.api_key = creds['API_KEY']
 def beginFunction():
     print("# ---------------------------------------------------------------------------- #")
     print("#                                Search Engine                                 #")
