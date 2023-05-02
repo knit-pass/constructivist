@@ -1,0 +1,40 @@
+{
+    "category": "Technology",
+    "weight_level1": 0.52,
+    "weight_level2": "null",
+    "weight_level3": "null",
+    "weight_level4": "null",
+    "normalized_weight_level1": 1.0,
+    "normalized_weight_level2": "null",
+    "normalized_weight_level3": "null",
+    "normalized_weight_level4": "null",
+    "topics_level1": [
+        {
+            "<Node element_id='4:1cba8fd3-d122-4dcd-907c-250902a79b48:12' labels=frozenset({'Topic'}) properties={'name': 'Elon musk'}>": 0.18
+        },
+        {
+            "<Node element_id='4:1cba8fd3-d122-4dcd-907c-250902a79b48:7' labels=frozenset({'Topic'}) properties={'name': 'Leonardo DiCaprio'}>": 0.02
+        },
+        {
+            "<Node element_id='4:1cba8fd3-d122-4dcd-907c-250902a79b48:0' labels=frozenset({'Topic'}) properties={'name': 'RAM'}>": 0.02
+        },
+        {
+            "<Node element_id='4:1cba8fd3-d122-4dcd-907c-250902a79b48:0' labels=frozenset({'Topic'}) properties={'name': 'RAM'}>": 0.3
+        }
+    ],
+    "topics_level2": [
+        {
+            "None": null
+        }
+    ],
+    "topics_level3": [
+        {
+            "None": null
+        }
+    ],
+    "topics_level4": [
+        {
+            "None": null
+        }
+    ]
+}

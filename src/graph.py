@@ -234,18 +234,36 @@ class App:
         #     "WHERE c.name = $category "
         #     "RETURN c, l1, l2, l3, l4"
         # )
-        query = (
-            "MATCH (c:Category{name:$category})"
-            "RETURN COALESCE(c.name) as name, "
-            "COALESCE(c.weight_level1,'null') as weight_level1, "
-            "COALESCE(c.weight_level2,'null') as weight_level2, "
-            "COALESCE(c.weight_level3,'null') as weight_level3, "
-            "COALESCE(c.weight_level4,'null') as weight_level4, "
-            "COALESCE(c.normalized_weight_level1,'null') as normalized_weight_level1, "
-            "COALESCE(c.normalized_weight_level2,'null') as normalized_weight_level2, "
-            "COALESCE(c.normalized_weight_level3,'null') as normalized_weight_level3, "
-            "COALESCE(c.normalized_weight_level4,'null') as normalized_weight_level4"
-        )
+        query = """
+            MATCH (c:Category{name:$category})-[:HAS]->(l:Level{name:'Level1'})<-[rel1:BELONGSTO]-(t:Topic)
+            OPTIONAL MATCH (c)-[:HAS]->(l2:Level{name:'Level2'})<-[rel2:BELONGSTO]-(t2:Topic)
+            OPTIONAL MATCH (c)-[:HAS]->(l3:Level{name:'Level3'})<-[rel3:BELONGSTO]-(t3:Topic)
+            OPTIONAL MATCH (c)-[:HAS]->(l4:Level{name:'Level4'})<-[rel4:BELONGSTO]-(t4:Topic)
+            RETURN COALESCE(c.name) as name, 
+                COALESCE(c.weight_level1,'null') as weight_level1, 
+                COALESCE(c.weight_level2,'null') as weight_level2, 
+                COALESCE(c.weight_level3,'null') as weight_level3, 
+                COALESCE(c.weight_level4,'null') as weight_level4, 
+                COALESCE(c.normalized_weight_level1,'null') as normalized_weight_level1, 
+                COALESCE(c.normalized_weight_level2,'null') as normalized_weight_level2, 
+                COALESCE(c.normalized_weight_level3,'null') as normalized_weight_level3, 
+                COALESCE(c.normalized_weight_level4,'null') as normalized_weight_level4,
+                COLLECT(DISTINCT {topic: t, value: rel1.value}) as topics_level1,
+                COLLECT(DISTINCT {topic: t2, value: rel2.value}) as topics_level2,
+                COLLECT(DISTINCT {topic: t3, value: rel3.value}) as topics_level3,
+                COLLECT(DISTINCT {topic: t4, value: rel4.value}) as topics_level4
+            """
+
+        #         MATCH (c:Category{name:"Technology"})-[:HAS]->(l:Level{name:"Level1"})<-[:BELONGSTO]-(t:Topic)
+        # RETURN COALESCE(c.name) as name, 
+        # COALESCE(c.weight_level1,'null') as weight_level1, 
+        # COALESCE(c.weight_level2,'null') as weight_level2, 
+        # COALESCE(c.weight_level3,'null') as weight_level3, 
+        # COALESCE(c.weight_level4,'null') as weight_level4, 
+        # COALESCE(c.normalized_weight_level1,'null') as normalized_weight_level1, 
+        # COALESCE(c.normalized_weight_level2,'null') as normalized_weight_level2, 
+        # COALESCE(c.normalized_weight_level3,'null') as normalized_weight_level3, 
+        # COALESCE(c.normalized_weight_level4,'null') as normalized_weight_level4
 
         record = tx.run(query,category = category).single()
         # data = {
@@ -268,8 +286,13 @@ class App:
             "normalized_weight_level1": record["normalized_weight_level1"],
             "normalized_weight_level2": record["normalized_weight_level2"],
             "normalized_weight_level3": record["normalized_weight_level3"],
-            "normalized_weight_level4": record["normalized_weight_level4"]
-        }
+            "normalized_weight_level4": record["normalized_weight_level4"],
+            "topics_level1": [{str(topic["name"]) : float(topic["value"]) if topic["value"] is not None else None} for topic in record["topics_level1"]],
+            "topics_level2": [{str(topic["name"]) : float(topic["value"]) if topic["value"] is not None else None} for topic in record["topics_level2"]],
+            "topics_level3": [{str(topic["name"]) : float(topic["value"]) if topic["value"] is not None else None} for topic in record["topics_level3"]],
+            "topics_level4": [{str(topic["name"]) : float(topic["value"]) if topic["value"] is not None else None} for topic in record["topics_level4"]]
+            }
+
         # "weight_level1": record[1],
         #     "weight_level2": record[2],
         #     "weight_level3": record[3],
@@ -401,9 +424,9 @@ categories = [
 
 
 def main_graph_test():
-    topic = "Leonardo DiCaprio"
+    topic = "Elon musk"
     level = "Level1"
-    category = "Entertainment"
+    category = "Technology"
     # for i in categories:
     #     app.create_new_category(i)
     # app.create_new_topic_relation(topic,level)

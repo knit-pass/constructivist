@@ -1,18 +1,26 @@
 [
     {
-        "category": "Entertainment",
-        "percentage": 10
+        "category": "Technology",
+        "percentage": 18
     },
     {
-        "category": "Culture",
-        "percentage": 7
+        "category": "Economy",
+        "percentage": 9
     },
     {
         "category": "Communication",
         "percentage": 7
     },
     {
-        "category": "Humanities",
+        "category": "Internet",
+        "percentage": 7
+    },
+    {
+        "category": "Entertainment",
+        "percentage": 7
+    },
+    {
+        "category": "Business",
         "percentage": 6
     },
     {
@@ -20,99 +28,35 @@
         "percentage": 6
     },
     {
-        "category": "Knowledge",
-        "percentage": 6
+        "category": "Universe",
+        "percentage": 5
     },
     {
-        "category": "Internet",
+        "category": "Knowledge",
         "percentage": 5
+    },
+    {
+        "category": "Energy",
+        "percentage": 4
     },
     {
         "category": "Language",
-        "percentage": 5
-    },
-    {
-        "category": "Health",
-        "percentage": 4
-    },
-    {
-        "category": "Economy",
-        "percentage": 4
-    },
-    {
-        "category": "Universe",
-        "percentage": 4
+        "percentage": 3
     },
     {
         "category": "Sport",
         "percentage": 3
     },
     {
-        "category": "Energy",
-        "percentage": 3
+        "category": "Culture",
+        "percentage": 2
     },
     {
-        "category": "Society",
-        "percentage": 3
+        "category": "Health",
+        "percentage": 2
     },
     {
         "category": "History",
         "percentage": 2
-    },
-    {
-        "category": "Mass media",
-        "percentage": 2
-    },
-    {
-        "category": "Education",
-        "percentage": 2
-    },
-    {
-        "category": "Technology",
-        "percentage": 2
-    },
-    {
-        "category": "Food and drink",
-        "percentage": 2
-    },
-    {
-        "category": "Business",
-        "percentage": 2
-    },
-    {
-        "category": "Military",
-        "percentage": 2
-    },
-    {
-        "category": "Nature",
-        "percentage": 2
-    },
-    {
-        "category": "Geography",
-        "percentage": 2
-    },
-    {
-        "category": "Philosophy",
-        "percentage": 2
-    },
-    {
-        "category": "Government",
-        "percentage": 1
-    },
-    {
-        "category": "Science",
-        "percentage": 1
-    },
-    {
-        "category": "Politics",
-        "percentage": 1
-    },
-    {
-        "category": "Academic discipline",
-        "percentage": 1
-    },
-    {
-        "category": "Engineering",
-        "percentage": 1
     }
 ]
