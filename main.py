@@ -2,7 +2,7 @@ from src import *
 
 
 def main():
-    wiki_test()
+    transformers_demo()
 
 
 if __name__ == "__main__":
