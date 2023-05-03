@@ -1,4 +1,5 @@
 from transformers import pipeline
+import json
 from .logger import *
 
 pipe = pipeline(model="facebook/bart-large-mnli")
@@ -45,7 +46,7 @@ def get_categories_cap(entity: str, tp=10):
         result_c = result["labels"]
         result_p = result["scores"]
         p = tp / 100
-        threshold = threshold_percentage * result_p[0]
+        threshold = p * result_p[0]
         j = 0
         score_sum = 0
         for i in result_p:
@@ -82,7 +83,9 @@ def get_categories(entity: str):
 
 
 def transformers_demo():
-    get_categories("Inflation")
+    result = get_categories("Inflation")
+    with open ("data/category.json") as f:
+        json.dump(result,f)
     get_categories_cap("Inflation")
 
 

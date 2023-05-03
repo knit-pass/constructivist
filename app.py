@@ -1,5 +1,6 @@
 import openai
 from dotenv import load_dotenv, dotenv_values
+from src import *
 
 creds = dotenv_values("chatgpt_credentials.env")
 openai.api_key = creds["API_KEY"]
@@ -27,6 +28,8 @@ def beginFunction():
             break
 
         question = input("Enter prompt : ")
+        
+        
 
         # call function to modify question using graph and store in newQuestion
         modifiedQuestion = "This is a new sample prompt"

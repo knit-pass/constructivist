@@ -230,7 +230,7 @@ class App:
         #     "RETURN c, l1, l2, l3, l4"
         # )
         query = """
-            MATCH (c:Category{name:$category})-[:HAS]->(l:Level{name:'Level1'})<-[rel1:BELONGSTO]-(t:Topic)
+            MATCH (c:Category{name:$category})-[:HAS]->(l:Level{name:'Level1'})<-[rel1:BELONGSTO]-(t1:Topic)
             OPTIONAL MATCH (c)-[:HAS]->(l2:Level{name:'Level2'})<-[rel2:BELONGSTO]-(t2:Topic)
             OPTIONAL MATCH (c)-[:HAS]->(l3:Level{name:'Level3'})<-[rel3:BELONGSTO]-(t3:Topic)
             OPTIONAL MATCH (c)-[:HAS]->(l4:Level{name:'Level4'})<-[rel4:BELONGSTO]-(t4:Topic)
@@ -243,10 +243,10 @@ class App:
                 COALESCE(c.normalized_weight_level2,'null') as normalized_weight_level2, 
                 COALESCE(c.normalized_weight_level3,'null') as normalized_weight_level3, 
                 COALESCE(c.normalized_weight_level4,'null') as normalized_weight_level4,
-                COLLECT(DISTINCT t) as topics_level1,
-                COLLECT(DISTINCT t2) as topics_level2,
-                COLLECT(DISTINCT t3) as topics_level3,
-                COLLECT(DISTINCT t4) as topics_level4
+                COALESCE(COLLECT(DISTINCT {topic: t1, value: rel1.value}),[]) as topics_level1,
+                COALESCE(COLLECT(DISTINCT {topic: t2, value: rel2.value}),[]) as topics_level2,
+                COALESCE(COLLECT(DISTINCT {topic: t3, value: rel3.value}),[]) as topics_level3,
+                COALESCE(COLLECT(DISTINCT {topic: t4, value: rel4.value}),[]) as topics_level4
             """
 
         #         MATCH (c:Category{name:"Technology"})-[:HAS]->(l:Level{name:"Level1"})<-[:BELONGSTO]-(t:Topic)
@@ -282,48 +282,31 @@ class App:
             "normalized_weight_level2": record["normalized_weight_level2"],
             "normalized_weight_level3": record["normalized_weight_level3"],
             "normalized_weight_level4": record["normalized_weight_level4"],
-            "topics_level1": [
-                {
-                    str(topic["name"]): float(topic["value"])
-                    if topic["value"] is not None
-                    else None
-                }
-                for topic in record["topics_level1"]
-            ],
-            "topics_level2": [
-                {
-                    str(topic["name"]): float(topic["value"])
-                    if topic["value"] is not None
-                    else None
-                }
-                for topic in record["topics_level2"]
-            ],
-            "topics_level3": [
-                {
-                    str(topic["name"]): float(topic["value"])
-                    if topic["value"] is not None
-                    else None
-                }
-                for topic in record["topics_level3"]
-            ],
-            "topics_level4": [
-                {
-                    str(topic["name"]): float(topic["value"])
-                    if topic["value"] is not None
-                    else None
-                }
-                for topic in record["topics_level4"]
-            ],
+            "topics_level1":[],
+            "topics_level2": [],
+            "topics_level3": [],
+            "topics_level4": []
         }
-
-        # "weight_level1": record[1],
-        #     "weight_level2": record[2],
-        #     "weight_level3": record[3],
-        #     "weight_level4": record[4],
-        #     "normalized_weight_level1": record[5],
-        #     "normalized_weight_level2": record[6],
-        #     "normalized_weight_level3": record[7],
-        #     "normalized_weight_level4": record[8]
+        for instance in record["topics_level1"]:
+            if(instance["topic"] != None and instance["value"]!=None):
+                data["topics_level1"].append({str(instance["topic"]["name"]): float(instance["value"])})
+            else:
+                continue
+        for instance in record["topics_level2"]:
+            if(instance["topic"] != None and instance["value"]!=None):
+                data["topics_level1"].append({str(instance["topic"]["name"]): float(instance["value"])})
+            else:
+                continue
+        for instance in record["topics_level3"]:
+            if(instance["topic"] != None and instance["value"]!=None):
+                data["topics_level1"].append({str(instance["topic"]["name"]): float(instance["value"])})
+            else:
+                continue
+        for instance in record["topics_level4"]:
+            if(instance["topic"] != None and instance["value"]!=None):
+                data["topics_level1"].append({str(instance["topic"]["name"]): float(instance["value"])})
+            else:
+                continue
 
         fileName = "data/" + category + ".json"
         with open(fileName, "w") as f:
@@ -370,7 +353,7 @@ class App:
                 topic=topic,
                 level=level,
                 category=i["category"],
-                value=float(i["percentage"]) / 100,
+                value=float(i["percentage"]),
             )
             try:
                 print(result)
@@ -443,9 +426,9 @@ categories = [
 
 
 def main_graph_test():
-    topic = "Elon musk"
+    topic = "Inflation"
     level = "Level1"
-    category = "Technology"
+    category = "Economy"
     # for i in categories:
     #     app.create_new_category(i)
     # app.create_new_topic_relation(topic,level)

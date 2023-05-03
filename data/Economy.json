@@ -1,16 +1,16 @@
 {
-    "category": "Technology",
-    "weight_level1": 0.021448971703648567,
+    "category": "Economy",
+    "weight_level1": 0.199516162276268,
     "weight_level2": "null",
     "weight_level3": "null",
     "weight_level4": "null",
-    "normalized_weight_level1": 0.10750493322916062,
+    "normalized_weight_level1": 1.0,
     "normalized_weight_level2": "null",
     "normalized_weight_level3": "null",
     "normalized_weight_level4": "null",
     "topics_level1": [
         {
-            "Inflation": 0.021448971703648567
+            "Inflation": 0.199516162276268
         }
     ],
     "topics_level2": [],

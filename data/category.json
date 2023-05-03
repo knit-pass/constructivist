@@ -1,0 +1,122 @@
+[
+    {
+    "category": "Economy",
+    "percentage": 0.199516162276268
+    },
+    {
+    "category": "Internet",
+    "percentage": 0.05129057168960571
+    },
+    {
+    "category": "Business",
+    "percentage": 0.049000658094882965
+    },
+    {
+    "category": "Universe",
+    "percentage": 0.04852527752518654
+    },
+    {
+    "category": "Society",
+    "percentage": 0.046125803142786026
+    },
+    {
+    "category": "Law",
+    "percentage": 0.040674902498722076
+    },
+    {
+    "category": "Communication",
+    "percentage": 0.035846248269081116
+    },
+    {
+    "category": "Humanities",
+    "percentage": 0.03540971875190735
+    },
+    {
+    "category": "Mass media",
+    "percentage": 0.034808412194252014
+    },
+    {
+    "category": "Language",
+    "percentage": 0.03380829840898514
+    },
+    {
+    "category": "Culture",
+    "percentage": 0.029755953699350357
+    },
+    {
+    "category": "Military",
+    "percentage": 0.029672155156731606
+    },
+    {
+    "category": "Government",
+    "percentage": 0.02782599627971649
+    },
+    {
+    "category": "Knowledge",
+    "percentage": 0.026395434513688087
+    },
+    {
+    "category": "Energy",
+    "percentage": 0.025593377649784088
+    },
+    {
+    "category": "History",
+    "percentage": 0.02399488538503647
+    },
+    {
+    "category": "Health",
+    "percentage": 0.023781245574355125
+    },
+    {
+    "category": "Academic discipline",
+    "percentage": 0.02186954952776432
+    },
+    {
+    "category": "Technology",
+    "percentage": 0.021448971703648567
+    },
+    {
+    "category": "Food and drink",
+    "percentage": 0.02005249820649624
+    },
+    {
+    "category": "Sport",
+    "percentage": 0.018726110458374023
+    },
+    {
+    "category": "Politics",
+    "percentage": 0.018300360068678856
+    },
+    {
+    "category": "Entertainment",
+    "percentage": 0.017881056293845177
+    },
+    {
+    "category": "Philosophy",
+    "percentage": 0.017434898763895035
+    },
+    {
+    "category": "Education",
+    "percentage": 0.017015699297189713
+    },
+    {
+    "category": "Geography",
+    "percentage": 0.01600673608481884
+    },
+    {
+    "category": "Science",
+    "percentage": 0.01557624340057373
+    },
+    {
+    "category": "Mathematics",
+    "percentage": 0.015020478516817093
+    },
+    {
+    "category": "Engineering",
+    "percentage": 0.014974584802985191
+    },
+    {
+    "category": "Religion",
+    "percentage": 0.01193987112492323
+    }
+]
