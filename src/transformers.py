@@ -1,6 +1,5 @@
 from transformers import pipeline
-import nltk
-import os
+from .logger import *
 
 pipe = pipeline(model="facebook/bart-large-mnli")
 
@@ -39,52 +38,51 @@ categories_refined = [
 ]
 
 
-def get_categories_cap(entity: str):
-    result = pipe(entity, candidate_labels=categories_refined)
-    result_c = result["labels"]
-    result_p = result["scores"]
-    threshold = 0.1 * result_p[0]
-    j = 0
-    score_sum = 0
-    for i in result_p:
-        if i < threshold:
-            break
-        score_sum += i
-        j += 1
-    result_p = result_p[0:j]
-    result_c = result_c[0:j]
-    balance = 1 - score_sum
+def get_categories_cap(entity: str, tp=10):
     result_dictionary = {}
-    for idx, i in enumerate(result_p):
-        result_p[idx] += i * balance
-        result_dictionary[result_c[idx]] = result_p[idx]
+    try:
+        result = pipe(entity, candidate_labels=categories_refined)
+        result_c = result["labels"]
+        result_p = result["scores"]
+        p = tp / 100
+        threshold = threshold_percentage * result_p[0]
+        j = 0
+        score_sum = 0
+        for i in result_p:
+            if i < threshold:
+                break
+            score_sum += i
+            j += 1
+        result_p = result_p[0:j]
+        result_c = result_c[0:j]
+        balance = 1 - score_sum
+        for idx, i in enumerate(result_p):
+            result_p[idx] += i * balance
+            result_dictionary[result_c[idx]] = result_p[idx]
+        Logger.write_debug(f"Categories fetched for(cap): {entity}")
+        Logger.write_debug(str(result_dictionary))
+    except Exception as e:
+        Logger.write_error(str(e))
     return result_dictionary
 
 
-    # entity = "Narendra Modi"
-    # result = pipe(entity, candidate_labels=cats)
-    # result_c = result["labels"]
-    # result_p = result["scores"]
-    # threshold = 0.3 * result_p[0]
-    # # print(result_c,result_p)
-    # j = 0
-    # for i in result_p:
-    #     if i < threshold:
-    #         break
-    #     j += 1
-    # result_p = result_p[0:j]
-    # result_c = result_c[0:j]
-    # print(result_c, result_p)
+def get_categories(entity: str):
+    result_dictionary = {}
+    try:
+        result = pipe(entity, candidate_labels=categories_refined)
+        result_c = result["labels"]
+        result_p = result["scores"]
+        for idx, i in enumerate(result_p):
+            result_dictionary[result_c[idx]] = result_p[idx]
+        Logger.write_debug(f"Categories fetched for: {entity}")
+        Logger.write_debug(str(result_dictionary))
+    except Exception as e:
+        Logger.write_error(str(e))
+    return result_dictionary
 
 
-
-
-def get_entities_of_paragraph(para : str):
-    sentences = nltk.sent_tokenize(para)
-    Entities = []
-    for sentence in sentences:
-        print(sentence)
-    
-
+def transformers_demo():
+    get_categories("Inflation")
+    get_categories_cap("Inflation")
 
 

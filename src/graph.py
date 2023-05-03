@@ -1,4 +1,3 @@
-# from .wikipedia import *
 import json
 import logging
 
@@ -412,28 +411,22 @@ categories = [
     "Academic discipline",
     "Business",
     "Communication",
-    "Concept",
     "Culture",
     "Economy",
     "Education",
     "Energy",
     "Engineering",
     "Entertainment",
-    "Entity",
-    "Ethics",
     "Food and drink",
     "Geography",
     "Government",
     "Health",
     "History",
-    "Human behavior",
     "Humanities",
-    "Information",
     "Internet",
     "Knowledge",
     "Language",
     "Law",
-    "Life",
     "Mass media",
     "Mathematics",
     "Military",
@@ -445,7 +438,6 @@ categories = [
     "Society",
     "Sport",
     "Technology",
-    "Time",
     "Universe",
 ]
 

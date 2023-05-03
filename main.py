@@ -8,9 +8,9 @@ para = """
 
        """
 def main():
-    # print(get_categories_cap("Youtube"))
-    
-    get_entities_of_paragraph()
+    Logger.start_log()
+    transformers_demo()
+    Logger.end_log()
 
 
 if __name__ == "__main__":
