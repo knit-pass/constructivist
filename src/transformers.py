@@ -36,7 +36,8 @@ categories_refined = [
     "Universe",
 ]
 
-def get_categories_cap(entity:str):
+
+def get_categories_cap(entity: str):
     result = pipe(entity, candidate_labels=categories_refined)
     result_c = result["labels"]
     result_p = result["scores"]
@@ -52,7 +53,7 @@ def get_categories_cap(entity:str):
     result_c = result_c[0:j]
     balance = 1 - score_sum
     result_dictionary = {}
-    for idx,i in enumerate(result_p):
+    for idx, i in enumerate(result_p):
         result_p[idx] += i * balance
         result_dictionary[result_c[idx]] = result_p[idx]
     return result_dictionary
@@ -63,13 +64,15 @@ def get_categories(entity: str):
     result_c = result["labels"]
     result_p = result["scores"]
     result_dictionary = {}
-    for idx,i in enumerate(result_p):
+    for idx, i in enumerate(result_p):
         result_dictionary[result_c[idx]] = result_p[idx]
     return result_dictionary
+
 
 def transformers_demo():
     print(get_categories("Inflation"))
     print(get_categories_cap("Inflation"))
+
 
 if __name__ == "__main__":
     transformers_demo()

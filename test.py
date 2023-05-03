@@ -14,10 +14,7 @@ max_tokens = 50
 
 # Send the request to ChatGPT
 response = openai.Completion.create(
-    engine=model_engine,
-    prompt=prompt,
-    temperature=temperature,
-    max_tokens=max_tokens
+    engine=model_engine, prompt=prompt, temperature=temperature, max_tokens=max_tokens
 )
 
 # Print the response from ChatGPT
