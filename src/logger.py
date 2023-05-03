@@ -6,7 +6,13 @@ import logging
 import time
 
 
+def write_warning(msg):
+    logging.warning(msg)
+    print("> WARNING: ", msg)
+
+
 class Logger:
+    @staticmethod
     def start_log():
         """
         It creates a log file with a unique name based on the current date and time,
@@ -25,26 +31,27 @@ class Logger:
         )
         logging.info("Log - START")
 
+    @staticmethod
     def write_info(msg):
         logging.info(msg)
         print("> INFO: ", msg)
 
+    @staticmethod
     def write_debug(msg):
         logging.debug(msg)
         print("> DEBUG: ", msg)
 
-    def write_warning(msg):
-        logging.warning(msg)
-        print("> WARNING: ", msg)
-
+    @staticmethod
     def write_error(msg):
         logging.error(msg)
         print("> ERROR: ", msg)
 
+    @staticmethod
     def write_critical(msg):
         logging.critical(msg)
         print("> CRITICAL: ", msg)
 
+    @staticmethod
     def end_log():
         logging.info("Log - END")
         logging.shutdown()

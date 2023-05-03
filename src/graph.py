@@ -1,10 +1,10 @@
-from neo4j import GraphDatabase
-import logging
-from neo4j.exceptions import ServiceUnavailable
-from dotenv import load_dotenv, dotenv_values
-
 # from .wikipedia import *
 import json
+import logging
+
+from dotenv import dotenv_values
+from neo4j import GraphDatabase
+from neo4j.exceptions import ServiceUnavailable
 
 
 class App:
@@ -117,32 +117,30 @@ class App:
         print("Topic created: ", topic, " : ", category)
 
     # ------- Functions to link topics to the Categories through sub-topics ------ #
-    def __create_topic_relation(self, topic,level):
+    def __create_topic_relation(self, topic, level):
         with self.driver.session(database="neo4j") as session:
             result = session.execute_write(
-                self.__create_topic_relation_driver, topic=topic,level = level
+                self.__create_topic_relation_driver, topic=topic, level=level
             )
             return [row for row in result]
-        
+
     def __assign_weights(self):
-        with self.driver.session(database='neo4j') as session:
-            result = session.execute_write(
-                self.__assign_weights_driver
-            )
+        with self.driver.session(database="neo4j") as session:
+            result = session.execute_write(self.__assign_weights_driver)
             return
 
     def __normalize_weights(self):
-        with self.driver.session(database='neo4j') as session:
+        with self.driver.session(database="neo4j") as session:
+            result = session.execute_write(self.__normalize_weights_driver)
+            return
+
+    def __fetch_weights(self, category):
+        with self.driver.session(database="neo4j") as session:
             result = session.execute_write(
-                self.__normalize_weights_driver
-            )
-            return 
-    def __fetch_weights(self,category):
-        with self.driver.session(database = 'neo4j') as session:
-            result = session.execute_write(
-                self.__fetch_weights_driver,category = category
+                self.__fetch_weights_driver, category=category
             )
             return result
+
     @staticmethod
     def __assign_weights_driver(tx):
         global user_profile
@@ -173,21 +171,21 @@ class App:
         )
 
         # "MATCH (n:Category)<-[r:BELONGSTO]-(otherNode) "
-            # "WITH n,SUM(r.value) AS weight "
-            # "SET n.weight = weight "
-            # "RETURN weight"
+        # "WITH n,SUM(r.value) AS weight "
+        # "SET n.weight = weight "
+        # "RETURN weight"
         result = tx.run(query1)
         result = tx.run(query2)
         result = tx.run(query3)
         result = tx.run(query4)
-        
+
         return result
 
     @staticmethod
     def __normalize_weights_driver(tx):
         global user_profile
         result = []
-        
+
         # query = (
         #     "MATCH (n:Profile)-[r:KNOWS]->(Category) "
         #     "WITH n,max(Category.weight) as max_weight "
@@ -200,7 +198,6 @@ class App:
         # SET c.normalized_weight_level1 = c.weight_level1 / max_weight
         # RETURN c.weight_level1, max_weight, c.normalized_weight_level1
 
-
         query = (
             "MATCH (c:Category) "
             "WITH MAX(c.weight_level1) as max_weight1, max(c.weight_level2) as max_weight2, "
@@ -212,17 +209,16 @@ class App:
             "c.normalized_weight_level4 = c.weight_level4 / max_weight4"
         )
 
-         # "RETURN c.name, c.weight_level1, c.weight_level2, c.weight_level3, c.weight_level4,"
-            #     "max_weight1, max_weight2, max_weight3, max_weight4,"
-            #     "c.normalized_weight_level1, c.normalized_weight_level2,"
-            #     "c.normalized_weight_level3, c.normalized_weight_level4"
-
-
+        # "RETURN c.name, c.weight_level1, c.weight_level2, c.weight_level3, c.weight_level4,"
+        #     "max_weight1, max_weight2, max_weight3, max_weight4,"
+        #     "c.normalized_weight_level1, c.normalized_weight_level2,"
+        #     "c.normalized_weight_level3, c.normalized_weight_level4"
 
         result = tx.run(query)
         return result
+
     @staticmethod
-    def __fetch_weights_driver(tx,category):
+    def __fetch_weights_driver(tx, category):
         global user_profile
 
         result = []
@@ -255,17 +251,17 @@ class App:
             """
 
         #         MATCH (c:Category{name:"Technology"})-[:HAS]->(l:Level{name:"Level1"})<-[:BELONGSTO]-(t:Topic)
-        # RETURN COALESCE(c.name) as name, 
-        # COALESCE(c.weight_level1,'null') as weight_level1, 
-        # COALESCE(c.weight_level2,'null') as weight_level2, 
-        # COALESCE(c.weight_level3,'null') as weight_level3, 
-        # COALESCE(c.weight_level4,'null') as weight_level4, 
-        # COALESCE(c.normalized_weight_level1,'null') as normalized_weight_level1, 
-        # COALESCE(c.normalized_weight_level2,'null') as normalized_weight_level2, 
-        # COALESCE(c.normalized_weight_level3,'null') as normalized_weight_level3, 
+        # RETURN COALESCE(c.name) as name,
+        # COALESCE(c.weight_level1,'null') as weight_level1,
+        # COALESCE(c.weight_level2,'null') as weight_level2,
+        # COALESCE(c.weight_level3,'null') as weight_level3,
+        # COALESCE(c.weight_level4,'null') as weight_level4,
+        # COALESCE(c.normalized_weight_level1,'null') as normalized_weight_level1,
+        # COALESCE(c.normalized_weight_level2,'null') as normalized_weight_level2,
+        # COALESCE(c.normalized_weight_level3,'null') as normalized_weight_level3,
         # COALESCE(c.normalized_weight_level4,'null') as normalized_weight_level4
 
-        record = tx.run(query,category = category).single()
+        record = tx.run(query, category=category).single()
         # data = {
         #     "category": record["c"].get("name"),
         #     "weight_level1": record["c"].get("weight_level1"),
@@ -287,12 +283,48 @@ class App:
             "normalized_weight_level2": record["normalized_weight_level2"],
             "normalized_weight_level3": record["normalized_weight_level3"],
             "normalized_weight_level4": record["normalized_weight_level4"],
+<<<<<<< HEAD
             "topics_level1":[topic["name"] for topic in record["topics_level1"]],
             "topics_level2":[topic["name"] for topic in record["topics_level2"]],
             "topics_level3":[topic["name"] for topic in record["topics_level3"]],
             "topics_level4":[topic["name"] for topic in record["topics_level4"]]
 
             }
+=======
+            "topics_level1": [
+                {
+                    str(topic["name"]): float(topic["value"])
+                    if topic["value"] is not None
+                    else None
+                }
+                for topic in record["topics_level1"]
+            ],
+            "topics_level2": [
+                {
+                    str(topic["name"]): float(topic["value"])
+                    if topic["value"] is not None
+                    else None
+                }
+                for topic in record["topics_level2"]
+            ],
+            "topics_level3": [
+                {
+                    str(topic["name"]): float(topic["value"])
+                    if topic["value"] is not None
+                    else None
+                }
+                for topic in record["topics_level3"]
+            ],
+            "topics_level4": [
+                {
+                    str(topic["name"]): float(topic["value"])
+                    if topic["value"] is not None
+                    else None
+                }
+                for topic in record["topics_level4"]
+            ],
+        }
+>>>>>>> 5a7eba73614ac0806eaa95dc93aa8ee94f8fef2d
 
         # "weight_level1": record[1],
         #     "weight_level2": record[2],
@@ -303,23 +335,23 @@ class App:
         #     "normalized_weight_level3": record[7],
         #     "normalized_weight_level4": record[8]
 
-        fileName = "data/"+category+".json"
-        with open(fileName,'w') as f:
-            json.dump(data,f)
-        
+        fileName = "data/" + category + ".json"
+        with open(fileName, "w") as f:
+            json.dump(data, f)
+
         return result
-        
+
     @staticmethod
-    def __create_topic_relation_driver(tx, topic,level):
+    def __create_topic_relation_driver(tx, topic, level):
         global user_profile
         # Creating a topic node with the name of the topic.
         result = []
         # topic_wiki_page = get_nearest_wiki_links(topic)[0]
         # category_wiki_page = get_nearest_wiki_links(category)[0]
         # shortest_path = get_shortest_path(topic_wiki_page, category_wiki_page)
-        query = ( 
+        query = (
             "MATCH (c:Category {name : $category})-[:HAS]->(l:Level {name : $level})"
-            "MERGE (t:Topic {name : $topic})" 
+            "MERGE (t:Topic {name : $topic})"
             "MERGE (l)<-[:BELONGSTO {value : $value}]-(t)"
         )
         # query = (
@@ -360,19 +392,22 @@ class App:
                 )
 
         return [row for row in result]
-    
-    def create_new_topic_relation(self, topic,level):
-        self.__create_topic_relation(topic,level)
-        print("Topic created: ", topic, " : ",level)
+
+    def create_new_topic_relation(self, topic, level):
+        self.__create_topic_relation(topic, level)
+        print("Topic created: ", topic, " : ", level)
+
     def assign_weights(self):
         self.__assign_weights()
         print("Weights Assigned")
+
     def normalize_weights(self):
         self.__normalize_weights()
         print("Weights Normalized")
-    def fetch_weights(self,category):
+
+    def fetch_weights(self, category):
         self.__fetch_weights(category)
-        print("Weights fetched : ",category)
+        print("Weights fetched : ", category)
 
 
 creds = dotenv_values("neo4j_credentials.env")
