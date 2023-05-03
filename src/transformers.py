@@ -38,13 +38,14 @@ categories_refined = [
 ]
 
 
-def get_categories_cap(entity: str):
+def get_categories_cap(entity: str, tp=10):
     result_dictionary = {}
     try:
         result = pipe(entity, candidate_labels=categories_refined)
         result_c = result["labels"]
         result_p = result["scores"]
-        threshold = 0.1 * result_p[0]
+        p = tp / 100
+        threshold = threshold_percentage * result_p[0]
         j = 0
         score_sum = 0
         for i in result_p:
