@@ -248,10 +248,10 @@ class App:
                 COALESCE(c.normalized_weight_level2,'null') as normalized_weight_level2, 
                 COALESCE(c.normalized_weight_level3,'null') as normalized_weight_level3, 
                 COALESCE(c.normalized_weight_level4,'null') as normalized_weight_level4,
-                COLLECT(DISTINCT {topic: t, value: rel1.value}) as topics_level1,
-                COLLECT(DISTINCT {topic: t2, value: rel2.value}) as topics_level2,
-                COLLECT(DISTINCT {topic: t3, value: rel3.value}) as topics_level3,
-                COLLECT(DISTINCT {topic: t4, value: rel4.value}) as topics_level4
+                COLLECT(DISTINCT t) as topics_level1,
+                COLLECT(DISTINCT t2) as topics_level2,
+                COLLECT(DISTINCT t3) as topics_level3,
+                COLLECT(DISTINCT t4) as topics_level4
             """
 
         #         MATCH (c:Category{name:"Technology"})-[:HAS]->(l:Level{name:"Level1"})<-[:BELONGSTO]-(t:Topic)
@@ -287,10 +287,11 @@ class App:
             "normalized_weight_level2": record["normalized_weight_level2"],
             "normalized_weight_level3": record["normalized_weight_level3"],
             "normalized_weight_level4": record["normalized_weight_level4"],
-            "topics_level1": [{str(topic["name"]) : float(topic["value"]) if topic["value"] is not None else None} for topic in record["topics_level1"]],
-            "topics_level2": [{str(topic["name"]) : float(topic["value"]) if topic["value"] is not None else None} for topic in record["topics_level2"]],
-            "topics_level3": [{str(topic["name"]) : float(topic["value"]) if topic["value"] is not None else None} for topic in record["topics_level3"]],
-            "topics_level4": [{str(topic["name"]) : float(topic["value"]) if topic["value"] is not None else None} for topic in record["topics_level4"]]
+            "topics_level1":[topic["name"] for topic in record["topics_level1"]],
+            "topics_level2":[topic["name"] for topic in record["topics_level2"]],
+            "topics_level3":[topic["name"] for topic in record["topics_level3"]],
+            "topics_level4":[topic["name"] for topic in record["topics_level4"]]
+
             }
 
         # "weight_level1": record[1],
