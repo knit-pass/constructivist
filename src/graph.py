@@ -283,14 +283,6 @@ class App:
             "normalized_weight_level2": record["normalized_weight_level2"],
             "normalized_weight_level3": record["normalized_weight_level3"],
             "normalized_weight_level4": record["normalized_weight_level4"],
-<<<<<<< HEAD
-            "topics_level1":[topic["name"] for topic in record["topics_level1"]],
-            "topics_level2":[topic["name"] for topic in record["topics_level2"]],
-            "topics_level3":[topic["name"] for topic in record["topics_level3"]],
-            "topics_level4":[topic["name"] for topic in record["topics_level4"]]
-
-            }
-=======
             "topics_level1": [
                 {
                     str(topic["name"]): float(topic["value"])
@@ -324,7 +316,6 @@ class App:
                 for topic in record["topics_level4"]
             ],
         }
->>>>>>> 5a7eba73614ac0806eaa95dc93aa8ee94f8fef2d
 
         # "weight_level1": record[1],
         #     "weight_level2": record[2],

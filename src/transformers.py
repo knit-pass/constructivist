@@ -1,4 +1,6 @@
 from transformers import pipeline
+import nltk
+import os
 
 pipe = pipeline(model="facebook/bart-large-mnli")
 
@@ -74,5 +76,15 @@ def get_categories_cap(entity: str):
     # result_c = result_c[0:j]
     # print(result_c, result_p)
 
-if __name__ == "__main__":
-    transformers_demo()
+
+
+
+def get_entities_of_paragraph(para : str):
+    sentences = nltk.sent_tokenize(para)
+    Entities = []
+    for sentence in sentences:
+        print(sentence)
+    
+
+
+
