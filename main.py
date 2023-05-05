@@ -1,13 +1,10 @@
 from src import *
-from .app import *
+
+
 def main():
     Logger.start_log()
-    # transformers_demo()
-    para = """
-    Virat Kohli and Gautam Gambhir are both Indian cricketers who have played for the Indian national cricket team. They have shared the field in several matches as teammates, including during India's victorious campaign in the 2011 Cricket World Cup.
-    """
-    fetch_category_data(para,50)
-    beginFunction()
+    data = get_categories_cap("Inflation", 50)
+    main_graph_test(data)
     Logger.end_log()
 
 

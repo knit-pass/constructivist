@@ -1,6 +1,5 @@
 import json
 import logging
-
 from dotenv import dotenv_values
 from neo4j import GraphDatabase
 from neo4j.exceptions import ServiceUnavailable
@@ -58,8 +57,8 @@ class App:
             "MERGE (t)-[:HAS]->(:Level {name: 'Level4'})"
             "RETURN r"
         )
-        result = tx.run(query, category=category)
         try:
+            result = tx.run(query, category=category)
             return [row for row in result]
         # Capture any errors along with the query and data for traceability
         except ServiceUnavailable as exception:
@@ -139,28 +138,24 @@ class App:
                 self.__fetch_weights_driver, category=category
             )
             return result
-        
+
     def __fetch_profiles(self):
         with self.driver.session(database="neo4j") as session:
-            result = session.execute_write(
-                self.__fetch_profiles_driver
-            )
+            result = session.execute_write(self.__fetch_profiles_driver)
             return result
-    def __create_profile(self,name):
+
+    def __create_profile(self, name):
         with self.driver.session(database="neo4j") as session:
-            result = session.execute_write(
-                self.__create_profile_driver,name = name
-            )
+            result = session.execute_write(self.__create_profile_driver, name=name)
             return result
-    def __delete_profile(self,name):
+
+    def __delete_profile(self, name):
         with self.driver.session(database="neo4j") as session:
-            result = session.execute_write(
-                self.__delete_profile_driver,name = name
-            )
+            result = session.execute_write(self.__delete_profile_driver, name=name)
             return result
-        
+
     @staticmethod
-    def __delete_profile_driver(tx,name):
+    def __delete_profile_driver(tx, name):
         global user_profile
         query = """
             MATCH (p:Profile{name:$name})-[r1:KNOWS]->(c:Category)-[r2:HAS]->(l:Level)<-[r3:BELONGSTO]-(t:Topic)
@@ -169,22 +164,22 @@ class App:
             DELETE r3
             DELETE t,c,l,p
         """
-        tx.run(query,name = name)
+        tx.run(query, name=name)
 
     @staticmethod
-    def __create_profile_driver(tx,name):
+    def __create_profile_driver(tx, name):
         global user_profile
 
         query = """
             MERGE (p:Profile{name:$name})
         """
 
-        tx.run(query,name = name)
+        tx.run(query, name=name)
 
     @staticmethod
     def __fetch_profiles_driver(tx):
         global user_profile
-        
+
         query = """
            MATCH (p:Profile)
            RETURN p.name as profileNames
@@ -193,7 +188,7 @@ class App:
 
         profile_names = [record["profileNames"] for record in result]
         return profile_names
-    
+
     @staticmethod
     def __assign_weights_driver(tx):
         global user_profile
@@ -336,29 +331,37 @@ class App:
             "normalized_weight_level2": record["normalized_weight_level2"],
             "normalized_weight_level3": record["normalized_weight_level3"],
             "normalized_weight_level4": record["normalized_weight_level4"],
-            "topics_level1":[],
+            "topics_level1": [],
             "topics_level2": [],
             "topics_level3": [],
-            "topics_level4": []
+            "topics_level4": [],
         }
         for instance in record["topics_level1"]:
-            if(instance["topic"] != None and instance["value"]!=None):
-                data["topics_level1"].append({str(instance["topic"]["name"]): float(instance["value"])})
+            if instance["topic"] != None and instance["value"] != None:
+                data["topics_level1"].append(
+                    {str(instance["topic"]["name"]): float(instance["value"])}
+                )
             else:
                 continue
         for instance in record["topics_level2"]:
-            if(instance["topic"] != None and instance["value"]!=None):
-                data["topics_level1"].append({str(instance["topic"]["name"]): float(instance["value"])})
+            if instance["topic"] != None and instance["value"] != None:
+                data["topics_level1"].append(
+                    {str(instance["topic"]["name"]): float(instance["value"])}
+                )
             else:
                 continue
         for instance in record["topics_level3"]:
-            if(instance["topic"] != None and instance["value"]!=None):
-                data["topics_level1"].append({str(instance["topic"]["name"]): float(instance["value"])})
+            if instance["topic"] != None and instance["value"] != None:
+                data["topics_level1"].append(
+                    {str(instance["topic"]["name"]): float(instance["value"])}
+                )
             else:
                 continue
         for instance in record["topics_level4"]:
-            if(instance["topic"] != None and instance["value"]!=None):
-                data["topics_level1"].append({str(instance["topic"]["name"]): float(instance["value"])})
+            if instance["topic"] != None and instance["value"] != None:
+                data["topics_level1"].append(
+                    {str(instance["topic"]["name"]): float(instance["value"])}
+                )
             else:
                 continue
 
@@ -438,15 +441,14 @@ class App:
 
     def fetch_profiles(self):
         return self.__fetch_profiles()
-    
-    def create_profile(self,name):
-        self.__create_profile(name)
-        print("Profile created : ",name)
 
-    def delete_profile(self,name):
+    def create_profile(self, name):
+        self.__create_profile(name)
+        print("Profile created : ", name)
+
+    def delete_profile(self, name):
         self.__delete_profile(name)
-        print("Profile Deleted :",name)
-        
+        print("Profile Deleted :", name)
 
 
 creds = dotenv_values("neo4j_credentials.env")
@@ -492,18 +494,15 @@ categories = [
 
 
 def main_graph_test():
-    # topic = "Inflation"
-    # level = "Level1"
-    # category = "Economy"
-    # # for i in categories:
-    # #     app.create_new_category(i)
-    # # app.create_new_topic_relation(topic,level)
-    # # app.assign_weights()
-    # # app.normalize_weights()
-    # app.fetch_weights(category)
-    # print(app.fetch_profiles())
-    # app.create_profile("user2")
-    # app.delete_profile("user2")
+    topic = "Inflation"
+    level = "Level1"
+    category = "Economy"
+    for i in categories:
+        app.create_new_category(i)
+    app.create_new_topic_relation(topic, level)
+    app.assign_weights()
+    app.normalize_weights()
+    app.fetch_weights(category)
     app.close()
 
 

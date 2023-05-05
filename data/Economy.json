@@ -1,1 +1,17 @@
+<<<<<<< Updated upstream
 {"category": "Economy", "weight_level1": 0.199516162276268, "weight_level2": "null", "weight_level3": "null", "weight_level4": "null", "normalized_weight_level1": 1.0, "normalized_weight_level2": "null", "normalized_weight_level3": "null", "normalized_weight_level4": "null", "topics_level1": [{"Inflation": 0.199516162276268}], "topics_level2": [], "topics_level3": [], "topics_level4": []}
+=======
+{
+    "category": "Economy",
+    "weight": 0.3592256255430859,
+    "normalized_weight": "null",
+    "topics_level1": [
+        {
+            "Inflation": 0.3592256255430859
+        }
+    ],
+    "topics_level2": [],
+    "topics_level3": [],
+    "topics_level4": []
+}
+>>>>>>> Stashed changes
