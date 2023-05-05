@@ -1,5 +1,6 @@
 import json
 import logging
+
 from dotenv import dotenv_values
 from neo4j import GraphDatabase
 from neo4j.exceptions import ServiceUnavailable
@@ -12,7 +13,29 @@ class App:
     def close(self):
         self.driver.close()
 
-    #!--------------------------------------------------------------------------------------------------
+    # ---------------- Functions to check if the category exists ---------------- #
+    def __check_category(self, category):
+        with self.driver.session(database="neo4j") as session:
+            result = session.execute_write(
+                self.__check_category_driver, category=category
+            )
+            return result
+
+    @staticmethod
+    def __check_category_driver(tx, category):
+        query = "MATCH (t:Category{name : $category})" "RETURN t"
+        result = tx.run(query, category=category)
+        try:
+            return [row for row in result]
+        # Capture any errors along with the query and data for traceability
+        except ServiceUnavailable as exception:
+            logging.error(
+                "{query} raised an error: \n {exception}".format(
+                    query=query, exception=exception
+                )
+            )
+            raise
+
     # ------ Functions to create category and link it to user profile(KNOWS) ----- #
 
     def __create_category(self, category):
@@ -42,6 +65,7 @@ class App:
         )
         try:
             result = tx.run(query, category=category)
+
             return [row for row in result]
         # Capture any errors along with the query and data for traceability
         except ServiceUnavailable as exception:
@@ -122,11 +146,32 @@ class App:
             result = session.execute_write(self.__normalize_weights_driver)
             return
 
+    def __fetch_weights(self, category):
+        with self.driver.session(database="neo4j") as session:
+            result = session.execute_write(
+                self.__fetch_weights_driver, category=category
+            )
+            return result
+
+    def __fetch_profiles(self):
+        with self.driver.session(database="neo4j") as session:
+            result = session.execute_write(self.__fetch_profiles_driver)
+            return result
+
+    def __create_profile(self, name):
+        with self.driver.session(database="neo4j") as session:
+            result = session.execute_write(self.__create_profile_driver, name=name)
+            return result
+
+    def __delete_profile(self, name):
+        with self.driver.session(database="neo4j") as session:
+            result = session.execute_write(self.__delete_profile_driver, name=name)
+            return result
+
     @staticmethod
     def __normalize_weights_driver(tx):
         global user_profile
         result = []
-
         query_normalize_levels = (
             "MATCH (p:Profile)-[:KNOWS]->(c:Category)"
             "WITH collect(c) AS categories"
@@ -169,6 +214,18 @@ class App:
                 self.__fetch_weights_driver, category=category
             )
             return result
+
+    @staticmethod
+    def __delete_profile_driver(tx, name):
+        global user_profile
+        query = """
+            MATCH (p:Profile{name:$name})-[r1:KNOWS]->(c:Category)-[r2:HAS]->(l:Level)<-[r3:BELONGSTO]-(t:Topic)
+            DELETE r1
+            DELETE r2
+            DELETE r3
+            DELETE t,c,l,p
+        """
+        tx.run(query, name=name)
 
     @staticmethod
     def __fetch_weights_driver(tx, category):
@@ -246,7 +303,32 @@ class App:
         self.__fetch_weights(category)
         print("Weights fetched : ", category)
 
-    #!-------------------------------------------------------------------------------------------------
+    def create_new_topic_relation(self, topic, level):
+        self.__create_topic_relation(topic, level)
+        print("Topic created: ", topic, " : ", level)
+
+    def assign_weights(self):
+        self.__assign_weights()
+        print("Weights Assigned")
+
+    def normalize_weights(self):
+        self.__normalize_weights()
+        print("Weights Normalized")
+
+    def fetch_weights(self, category):
+        self.__fetch_weights(category)
+        print("Weights fetched : ", category)
+
+    def fetch_profiles(self):
+        return self.__fetch_profiles()
+
+    def create_profile(self, name):
+        self.__create_profile(name)
+        print("Profile created : ", name)
+
+    def delete_profile(self, name):
+        self.__delete_profile(name)
+        print("Profile Deleted :", name)
 
 
 creds = dotenv_values("neo4j_credentials.env")
