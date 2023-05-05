@@ -29,8 +29,6 @@ def beginFunction():
 
         question = input("Enter prompt : ")
         
-        
-
         # call function to modify question using graph and store in newQuestion
         modifiedQuestion = "This is a new sample prompt"
         if questionType == 1:
@@ -65,9 +63,9 @@ def choose_profiles(choice=0) -> str:
         print("Enter your choice: ")
         choice = int(input())
     profile = ""
-    # TODO: Fetch users from graph DB
-    available_profiles = ["user1", "user2", "user3"]
-
+   
+    available_profiles = app.fetch_profiles()
+    
     # Create new profile
     if choice == 1:
         print("Enter the name of new profile: ")

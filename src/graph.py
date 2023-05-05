@@ -139,7 +139,26 @@ class App:
                 self.__fetch_weights_driver, category=category
             )
             return result
+        
+    def __fetch_profiles(self):
+        with self.driver.session(database="neo4j") as session:
+            result = session.execute_write(
+                self.__fetch_profiles_driver
+            )
+            return result
+    @staticmethod
+    def __fetch_profiles_driver(tx):
+        global user_profile
+        
+        query = """
+           MATCH (p:Profile)
+           RETURN p.name as profileNames
+        """
+        result = tx.run(query)
 
+        profile_names = [record["profileNames"] for record in result]
+        return profile_names
+    
     @staticmethod
     def __assign_weights_driver(tx):
         global user_profile
@@ -382,6 +401,11 @@ class App:
         self.__fetch_weights(category)
         print("Weights fetched : ", category)
 
+    def fetch_profiles(self):
+        print("Profiles fetched")
+        return self.__fetch_profiles()
+        
+
 
 creds = dotenv_values("neo4j_credentials.env")
 uri = creds["NEO4J_URI"]
@@ -426,15 +450,16 @@ categories = [
 
 
 def main_graph_test():
-    topic = "Inflation"
-    level = "Level1"
-    category = "Economy"
-    # for i in categories:
-    #     app.create_new_category(i)
-    # app.create_new_topic_relation(topic,level)
-    # app.assign_weights()
-    # app.normalize_weights()
-    app.fetch_weights(category)
+    # topic = "Inflation"
+    # level = "Level1"
+    # category = "Economy"
+    # # for i in categories:
+    # #     app.create_new_category(i)
+    # # app.create_new_topic_relation(topic,level)
+    # # app.assign_weights()
+    # # app.normalize_weights()
+    # app.fetch_weights(category)
+    print(app.fetch_profiles())
     app.close()
 
 
