@@ -1,5 +1,6 @@
 import json
 import logging
+
 from dotenv import dotenv_values
 from neo4j import GraphDatabase
 from neo4j.exceptions import ServiceUnavailable
@@ -64,6 +65,7 @@ class App:
         )
         try:
             result = tx.run(query, category=category)
+
             return [row for row in result]
         # Capture any errors along with the query and data for traceability
         except ServiceUnavailable as exception:
@@ -319,14 +321,8 @@ class App:
         record = tx.run(query, category=category).single()
         data = {
             "category": record["name"],
-            "weight_level1": record["weight_level1"],
-            "weight_level2": record["weight_level2"],
-            "weight_level3": record["weight_level3"],
-            "weight_level4": record["weight_level4"],
-            "normalized_weight_level1": record["normalized_weight_level1"],
-            "normalized_weight_level2": record["normalized_weight_level2"],
-            "normalized_weight_level3": record["normalized_weight_level3"],
-            "normalized_weight_level4": record["normalized_weight_level4"],
+            "weight": record["weight"],
+            "normalized_weight": record["normalized_weight"],
             "topics_level1": [],
             "topics_level2": [],
             "topics_level3": [],

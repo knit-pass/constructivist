@@ -17,11 +17,11 @@ def beginFunction():
         "# ---------------------------------------------------------------------------- #\n"
     )
 
-    profileChoosen = choose_profiles()
+    # profileChoosen = choose_profiles()
 
 
 
-    print("Working on : ",profileChoosen)
+    # print("Working on : ",profileChoosen)
     print("MENU : ")
     print("1.Give modified prompt  2.Give solution  3.Exit\n")
 
@@ -36,7 +36,13 @@ def beginFunction():
             break
 
         question = input("Enter prompt : ")
-        
+        promptCategories = get_prompt_categories(question)
+        userKnowledge = []
+        print(promptCategories)
+        for key,value in promptCategories.items():
+            userKnowledge.append(fetch_category_data(key,50))
+        print(userKnowledge)
+
         # call function to modify question using graph and store in newQuestion
         modifiedQuestion = "This is a new sample prompt"
 
@@ -47,8 +53,7 @@ def beginFunction():
             # solution = "This is a sample solution"
             solution = giveAnswer(question) # uses API key
             print(type(solution))
-            print(get_prompt_categories(solution))
-            # print("Solution : " + solution)
+            
             print(
                 "# ---------------------------------------------------------------------------- #"
             )
