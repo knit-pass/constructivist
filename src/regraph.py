@@ -9,14 +9,17 @@ from neo4j.exceptions import ServiceUnavailable
 class App:
     def __init__(self, uri, user, password):
         self.driver = GraphDatabase.driver(uri, auth=(user, password))
-        self.category_data = {}
-        self.users = []
 
     def close(self):
         self.driver.close()
 
-    #!----------------------------------------------------------------------------------------
     # ---------------- Functions to check if the category exists ---------------- #
+    def __check_category(self, category):
+        with self.driver.session(database="neo4j") as session:
+            result = session.execute_write(
+                self.__check_category_driver, category=category
+            )
+            return result
 
     @staticmethod
     def __check_category_driver(tx, category):
@@ -33,15 +36,14 @@ class App:
             )
             raise
 
-    def __check_category(self, category):
+    # ------ Functions to create category and link it to user profile(KNOWS) ----- #
+
+    def __create_category(self, category):
         with self.driver.session(database="neo4j") as session:
             result = session.execute_write(
-                self.__check_category_driver, category=category
+                self.__create_category_driver, category=category
             )
-            return result
-
-    #!----------------------------------------------------------------------------------------
-    # ------ Functions to create category and link it to user profile(KNOWS) ----- #
+            return [row for row in result]
 
     @staticmethod
     def __create_category_driver(tx, category):
@@ -63,7 +65,9 @@ class App:
         )
         try:
             result = tx.run(query, category=category)
+
             return [row for row in result]
+        # Capture any errors along with the query and data for traceability
         except ServiceUnavailable as exception:
             logging.error(
                 "{query} raised an error: \n {exception}".format(
@@ -71,20 +75,29 @@ class App:
                 )
             )
 
-    def __create_category(self, category):
-        with self.driver.session(database="neo4j") as session:
-            result = session.execute_write(
-                self.__create_category_driver, category=category
-            )
-            return [row for row in result]
-
     def create_new_category(self, category):
+        # res = self.__check_category(category)
+        # if not res:
+        #     self.__create_category(category)
+        #     print("Category created: ", category)
+        # else:
+        #     print("Category already exists: ", category)
         self.__create_category(category)
         print("Category created: ", category)
 
-    #!----------------------------------------------------------------------------------------
+    #!--------------------------------------------------------------------------------------------------
 
     # ------- Functions to link topics to the Categories through sub-topics ------ #
+    def __create_topic_relation(self, topic, level, category_result):
+        with self.driver.session(database="neo4j") as session:
+            result = session.execute_write(
+                self.__create_topic_relation_driver,
+                topic=topic,
+                level=level,
+                category_result=category_result,
+            )
+            return [row for row in result]
+
     @staticmethod
     def __create_topic_relation_driver(tx, topic, level, category_result):
         global user_profile
@@ -122,19 +135,33 @@ class App:
                 continue
         return [row for row in result]
 
-    def __create_topic_relation(self, topic, level, category_result):
-        with self.driver.session(database="neo4j") as session:
-            result = session.execute_write(
-                self.__create_topic_relation_driver,
-                topic=topic,
-                level=level,
-                category_result=category_result,
-            )
-            return [row for row in result]
-
     def create_new_topic_relation(self, topic, level, categories_result):
         self.__create_topic_relation(topic, level, categories_result)
         print("Topic created: ", topic, " : ", level)
+
+    #!-------------------------------------------------------------------------------------------------
+
+    def __normalize_weights(self):
+        with self.driver.session(database="neo4j") as session:
+            result = session.execute_write(self.__normalize_weights_driver)
+            return
+
+    def __fetch_weights(self, category):
+        with self.driver.session(database="neo4j") as session:
+            result = session.execute_write(
+                self.__fetch_weights_driver, category=category
+            )
+            return result
+
+    def __fetch_profiles(self):
+        with self.driver.session(database="neo4j") as session:
+            result = session.execute_write(self.__fetch_profiles_driver)
+            return result
+
+    def __create_profile(self, name):
+        with self.driver.session(database="neo4j") as session:
+            result = session.execute_write(self.__create_profile_driver, name=name)
+            return result
 
     def __delete_profile(self, name):
         with self.driver.session(database="neo4j") as session:
@@ -198,11 +225,6 @@ class App:
         result2 = tx.run(query_normalize_categories)
         return [result1, result2]
 
-    def __normalize_weights(self):
-        with self.driver.session(database="neo4j") as session:
-            result = session.execute_write(self.__normalize_weights_driver)
-            return
-
     def normalize_weights(self):
         self.__normalize_weights()
         print("Weights Normalized")
@@ -224,7 +246,16 @@ class App:
     @staticmethod
     def __fetch_weights_driver(tx, category):
         global user_profile
+
         result = []
+        # query = (
+        #     "MATCH (c:Category)-[:HAS]->(l1:Level {name:'Level1'}) "
+        #     "MATCH (c:Category)-[:HAS]->(l2:Level {name:'Level2'}) "
+        #     "MATCH (c:Category)-[:HAS]->(l3:Level {name:'Level3'}) "
+        #     "MATCH (c:Category)-[:HAS]->(l4:Level {name:'Level4'}) "
+        #     "WHERE c.name = $category "
+        #     "RETURN c, l1, l2, l3, l4"
+        # )
         query = """
             MATCH (c:Category{name:$category})-[:HAS]->(l:Level{name:'Level1'})<-[rel1:BELONGSTO]-(t1:Topic)
             OPTIONAL MATCH (c)-[:HAS]->(l2:Level{name:'Level2'})<-[rel2:BELONGSTO]-(t2:Topic)
@@ -258,21 +289,21 @@ class App:
                 continue
         for instance in record["topics_level2"]:
             if instance["topic"] != None and instance["value"] != None:
-                data["topics_level2"].append(
+                data["topics_level1"].append(
                     {str(instance["topic"]["name"]): float(instance["value"])}
                 )
             else:
                 continue
         for instance in record["topics_level3"]:
             if instance["topic"] != None and instance["value"] != None:
-                data["topics_level3"].append(
+                data["topics_level1"].append(
                     {str(instance["topic"]["name"]): float(instance["value"])}
                 )
             else:
                 continue
         for instance in record["topics_level4"]:
             if instance["topic"] != None and instance["value"] != None:
-                data["topics_level4"].append(
+                data["topics_level1"].append(
                     {str(instance["topic"]["name"]): float(instance["value"])}
                 )
             else:
@@ -281,49 +312,27 @@ class App:
         fileName = "data/" + category + ".json"
         with open(fileName, "w") as f:
             json.dump(data, f)
-        return data
 
-    def __fetch_weights(self, category):
-        with self.driver.session(database="neo4j") as session:
-            result = session.execute_write(
-                self.__fetch_weights_driver,
-                category=category,
-            )
-            return result
+        return result
 
-    def __delete_profile(self, name):
-        with self.driver.session(database="neo4j") as session:
-            result = session.execute_write(self.__delete_profile_driver, name=name)
-            return result
+    def assign_weights(self):
+        self.__assign_weights()
+        print("Weights Assigned")
 
     def fetch_weights(self, category):
         self.__fetch_weights(category)
         print("Weights fetched : ", category)
 
     def fetch_profiles(self):
-        data = self.__fetch_profiles()
-        self.users = data
-        return data
-
-    #!----------------------------------------------------------------------------------------
-
-    def __create_profile(self, name):
-        with self.driver.session(database="neo4j") as session:
-            result = session.execute_write(self.__create_profile_driver, name=name)
-            return result
-
-    def __create_profile_driver(tx, name):
-        query = """
-            MERGE (p:Profile {name: $name})
-            RETURN p
-        """
-        return tx.run(query, name=name)
+        return self.__fetch_profiles()
 
     def create_profile(self, name):
         self.__create_profile(name)
         print("Profile created : ", name)
 
-    #!----------------------------------------------------------------------------------------
+    def delete_profile(self, name):
+        self.__delete_profile(name)
+        print("Profile Deleted :", name)
 
 
 creds = dotenv_values("neo4j_credentials.env")
