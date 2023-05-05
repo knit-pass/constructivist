@@ -65,7 +65,7 @@ class App:
         )
         try:
             result = tx.run(query, category=category)
-        
+
             return [row for row in result]
         # Capture any errors along with the query and data for traceability
         except ServiceUnavailable as exception:
@@ -152,52 +152,36 @@ class App:
                 self.__fetch_weights_driver, category=category
             )
             return result
-        
+
     def __fetch_profiles(self):
         with self.driver.session(database="neo4j") as session:
-            result = session.execute_write(
-                self.__fetch_profiles_driver
-            )
+            result = session.execute_write(self.__fetch_profiles_driver)
             return result
-    def __create_profile(self,name):
+
+    def __create_profile(self, name):
         with self.driver.session(database="neo4j") as session:
-            result = session.execute_write(
-                self.__create_profile_driver,name = name
-            )
+            result = session.execute_write(self.__create_profile_driver, name=name)
             return result
-    def __delete_profile(self,name):
+
+    def __delete_profile(self, name):
         with self.driver.session(database="neo4j") as session:
-            result = session.execute_write(
-                self.__delete_profile_driver,name = name
-            )
+            result = session.execute_write(self.__delete_profile_driver, name=name)
             return result
         
     @staticmethod
-    def __delete_profile_driver(tx,name):
-        global user_profile
-        query = """
-            MATCH (p:Profile{name:$name})-[r1:KNOWS]->(c:Category)-[r2:HAS]->(l:Level)<-[r3:BELONGSTO]-(t:Topic)
-            DELETE r1
-            DELETE r2
-            DELETE r3
-            DELETE t,c,l,p
-        """
-        tx.run(query,name = name)
-
-    @staticmethod
-    def __create_profile_driver(tx,name):
+    def __create_profile_driver(tx, name):
         global user_profile
 
         query = """
             MERGE (p:Profile{name:$name})
         """
 
-        tx.run(query,name = name)
+        tx.run(query, name=name)
 
     @staticmethod
     def __fetch_profiles_driver(tx):
         global user_profile
-        
+
         query = """
            MATCH (p:Profile)
            RETURN p.name as profileNames
@@ -206,7 +190,6 @@ class App:
 
         profile_names = [record["profileNames"] for record in result]
         return profile_names
-    
     
     @staticmethod
     def __normalize_weights_driver(tx):
@@ -248,15 +231,8 @@ class App:
 
     #!-------------------------------------------------------------------------------------------------
 
-    def __fetch_weights(self, category):
-        with self.driver.session(database="neo4j") as session:
-            result = session.execute_write(
-                self.__fetch_weights_driver, category=category
-            )
-            return result
-
     @staticmethod
-    def __delete_profile_driver(tx,name):
+    def __delete_profile_driver(tx, name):
         global user_profile
         query = """
             MATCH (p:Profile{name:$name})-[r1:KNOWS]->(c:Category)-[r2:HAS]->(l:Level)<-[r3:BELONGSTO]-(t:Topic)
@@ -265,7 +241,8 @@ class App:
             DELETE r3
             DELETE t,c,l,p
         """
-        tx.run(query,name = name)
+        tx.run(query, name=name)
+
     @staticmethod
     def __fetch_weights_driver(tx, category):
         global user_profile
@@ -338,20 +315,10 @@ class App:
 
         return result
 
-    def fetch_weights(self, category):
-        self.__fetch_weights(category)
-        print("Weights fetched : ", category)
-    def create_new_topic_relation(self, topic, level):
-        self.__create_topic_relation(topic, level)
-        print("Topic created: ", topic, " : ", level)
 
     def assign_weights(self):
         self.__assign_weights()
         print("Weights Assigned")
-
-    def normalize_weights(self):
-        self.__normalize_weights()
-        print("Weights Normalized")
 
     def fetch_weights(self, category):
         self.__fetch_weights(category)
@@ -359,15 +326,14 @@ class App:
 
     def fetch_profiles(self):
         return self.__fetch_profiles()
-    
-    def create_profile(self,name):
-        self.__create_profile(name)
-        print("Profile created : ",name)
 
-    def delete_profile(self,name):
+    def create_profile(self, name):
+        self.__create_profile(name)
+        print("Profile created : ", name)
+
+    def delete_profile(self, name):
         self.__delete_profile(name)
-        print("Profile Deleted :",name)
-        
+        print("Profile Deleted :", name)
 
 
 creds = dotenv_values("neo4j_credentials.env")
@@ -416,11 +382,11 @@ def main_graph_test():
     # topic = "Inflation"
     # level = "Level1"
     # category = "Economy"
-    # # for i in categories:
-    # #     app.create_new_category(i)
-    # # app.create_new_topic_relation(topic,level)
-    # # app.assign_weights()
-    # # app.normalize_weights()
+    # for i in categories:
+    #     app.create_new_category(i)
+    # app.create_new_topic_relation(topic,level)
+    # app.assign_weights()
+    # app.normalize_weights()
     # app.fetch_weights(category)
     # print(app.fetch_profiles())
     # app.create_profile("user2")

@@ -84,8 +84,6 @@ def get_categories(entity: str):
 
 def transformers_demo():
     result = get_categories("Inflation")
-    with open ("data/category.json") as f:
-        json.dump(result,f)
+    with open("data/category.json") as f:
+        json.dump(result, f)
     get_categories_cap("Inflation")
-
-
