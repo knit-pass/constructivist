@@ -32,4 +32,5 @@ def get_response_categories(response: str, threshold=50):
 def fetch_category_data(prompt,threshold):
     categories_fetched = get_prompt_categories(prompt,threshold)
     for i in categories_fetched:
-        app.fetch_weights(i)
+        print("# fetching weights for category : ",i)
+        # print(app.fetch_weights(i))
