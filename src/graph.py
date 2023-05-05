@@ -146,6 +146,41 @@ class App:
                 self.__fetch_profiles_driver
             )
             return result
+    def __create_profile(self,name):
+        with self.driver.session(database="neo4j") as session:
+            result = session.execute_write(
+                self.__create_profile_driver,name = name
+            )
+            return result
+    def __delete_profile(self,name):
+        with self.driver.session(database="neo4j") as session:
+            result = session.execute_write(
+                self.__delete_profile_driver,name = name
+            )
+            return result
+        
+    @staticmethod
+    def __delete_profile_driver(tx,name):
+        global user_profile
+        query = """
+            MATCH (p:Profile{name:$name})-[r1:KNOWS]->(c:Category)-[r2:HAS]->(l:Level)<-[r3:BELONGSTO]-(t:Topic)
+            DELETE r1
+            DELETE r2
+            DELETE r3
+            DELETE t,c,l,p
+        """
+        tx.run(query,name = name)
+
+    @staticmethod
+    def __create_profile_driver(tx,name):
+        global user_profile
+
+        query = """
+            MERGE (p:Profile{name:$name})
+        """
+
+        tx.run(query,name = name)
+
     @staticmethod
     def __fetch_profiles_driver(tx):
         global user_profile
@@ -402,8 +437,15 @@ class App:
         print("Weights fetched : ", category)
 
     def fetch_profiles(self):
-        print("Profiles fetched")
         return self.__fetch_profiles()
+    
+    def create_profile(self,name):
+        self.__create_profile(name)
+        print("Profile created : ",name)
+
+    def delete_profile(self,name):
+        self.__delete_profile(name)
+        print("Profile Deleted :",name)
         
 
 
@@ -459,7 +501,9 @@ def main_graph_test():
     # # app.assign_weights()
     # # app.normalize_weights()
     # app.fetch_weights(category)
-    print(app.fetch_profiles())
+    # print(app.fetch_profiles())
+    # app.create_profile("user2")
+    # app.delete_profile("user2")
     app.close()
 
 

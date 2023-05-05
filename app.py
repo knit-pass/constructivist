@@ -60,11 +60,13 @@ def choose_profiles(choice=0) -> str:
         print("1. Create New Profile")
         print("2. Use Existing Profile")
         print("3. Delete Profile")
+        print("4. Exit")
         print("Enter your choice: ")
         choice = int(input())
     profile = ""
    
     available_profiles = app.fetch_profiles()
+    # function called from graph.py
     
     # Create new profile
     if choice == 1:
@@ -74,39 +76,54 @@ def choose_profiles(choice=0) -> str:
             print("Duplicate profile!")
             profile = choose_profiles(1)
         print("The profile is: ", profile)
-        # TODO: Profile creation in DB
+        
+        app.create_profile(profile)
+        #function called from graph.py
+
         return profile
     # Choose existing profile
     elif choice == 2:
         print("Available profiles: ")
-        for i, idx in enumerate(available_profiles):
-            print(f"{idx+1}. i")
+        # for i, idx in enumerate(available_profiles):
+        #     print(f"{idx+1}. i")
+        idx = 1
+        for i in available_profiles:
+            print(str(idx)," : ",i)
+            idx = idx+1
         print("Choose your profile: ")
-        profile = int(input())
-        if profile > len(available_profiles) or profile < 0:
-            profile_name = choose_profiles(2)
-            return profile
+        profileIndex = int(input())
+        if profileIndex > len(available_profiles) or profileIndex< 0:
+            choose_profiles(2)
         else:
             # TODO: Choose profile logic
-            profile_name = available_profiles[profile - 1]
+            profile_name = available_profiles[profileIndex - 1]
         print("The profile is: ", profile_name)
         return profile_name
     # Delete profile
     elif choice == 3:
         print("Available profiles to delete: ")
-        for i, idx in enumerate(available_profiles):
-            print(f"{idx+1}. i")
+        idx = 1
+        for i in available_profiles:
+            print(str(idx)," : ",i)
+            idx = idx+1
         print("Choose the profile to delete: ")
-        profile = int(input())
-        if profile > len(available_profiles) or profile < 0:
+        profileIndex = int(input())
+        if profileIndex > len(available_profiles) or profileIndex < 0:
             print("Invalid option!")
             return choose_profiles(3)
         else:
-            profile_name = available_profiles[profile - 1]
+            profile_name = available_profiles[profileIndex - 1]
             # TODO: Delete Logic
-        print("The profile is: ", profile_name)
-        print("The following profile will be deleted: ", profile_name)
-        return ""
+            print("Are you sure you want to delete the entire data of : ",profile_name)
+            print("Y/N ?")
+            ack = input()
+            if(ack=='Y'or ack=='y'):
+                app.delete_profile(profile_name)
+            else :
+                return choose_profiles()
+
+    elif choice == 4:
+        beginFunction()
     else:
         print("Invalid option! ")
         return choose_profiles()
@@ -133,6 +150,6 @@ def init_new_profile(name: str = "") -> bool:
 
 
 if __name__ == "__main__":
-    # print("Chosen Profile: ", choose_profiles())
+    print("Chosen Profile: ", choose_profiles())
     # print(giveAnswer("who is narendra modi")) # function uses API key
-    beginFunction()
+    # beginFunction()
