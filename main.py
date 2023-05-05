@@ -1,5 +1,6 @@
 from src import *
 from .app import *
+
 def main():
     Logger.start_log()
     # transformers_demo()

@@ -18,13 +18,18 @@ def beginFunction():
     )
 
     profileChoosen = choose_profiles()
-    
 
+
+
+    print("Working on : ",profileChoosen)
     print("MENU : ")
     print("1.Give modified prompt  2.Give solution  3.Exit\n")
 
     while True:
         questionType = int(input("Enter 1/2/3 : "))
+
+        if(type(questionType)!=int):
+            continue
 
         if questionType == 3:
             print("Thank you!! exiting...")
@@ -34,27 +39,36 @@ def beginFunction():
         
         # call function to modify question using graph and store in newQuestion
         modifiedQuestion = "This is a new sample prompt"
+
         if questionType == 1:
             print("New Prompt : " + modifiedQuestion)
-        else:
-            solution = "This is a sample solution"
-            # solution = giveAnswer(modifiedQuestion) # uses API key
-            print("Solution : " + solution)
-        print(
-            "# ---------------------------------------------------------------------------- #"
-        )
-        print("\n")
+
+        elif questionType == 2:
+            # solution = "This is a sample solution"
+            solution = giveAnswer(question) # uses API key
+            print(type(solution))
+            print(get_prompt_categories(solution))
+            # print("Solution : " + solution)
+            print(
+                "# ---------------------------------------------------------------------------- #"
+            )
+            print("\n")
+        else :
+            print("Invalid input!!")
+            continue
 
 
 # this function uses API key to generate results
 def giveAnswer(message):
-    messages = [{"role": "system", "content": "You are a intelligent assistant."}]
+    messages = [{"role": "user", "content": "You are a intelligent assistant."}]
     if message:
         messages.append({"role": "user", "content": message},)
         chat = openai.ChatCompletion.create(model="gpt-3.5-turbo", messages=messages)
     reply = chat.choices[0].message.content
     print(f"ChatGPT: {reply}")
     messages.append({"role": "assistant", "content": reply})
+    return reply
+    
 
 
 def choose_profiles(choice=0) -> str:
@@ -122,9 +136,11 @@ def choose_profiles(choice=0) -> str:
             ack = input()
             if(ack=='Y'or ack=='y'):
                 app.delete_profile(profile_name)
+                available_profiles = app.fetch_profiles()
+                return choose_profiles()
             else :
                 return choose_profiles()
-            
+
     else:
         print("Invalid option! ")
         return choose_profiles()
@@ -151,6 +167,7 @@ def init_new_profile(name: str = "") -> bool:
 
 
 if __name__ == "__main__":
-    print("Chosen Profile: ", choose_profiles())
+    # print("Chosen Profile: ", choose_profiles())
+    beginFunction()
     # print(giveAnswer("who is narendra modi")) # function uses API key
     # beginFunction()
