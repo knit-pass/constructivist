@@ -17,6 +17,9 @@ def beginFunction():
         "# ---------------------------------------------------------------------------- #\n"
     )
 
+    profileChoosen = choose_profiles()
+    
+
     print("MENU : ")
     print("1.Give modified prompt  2.Give solution  3.Exit\n")
 
@@ -121,9 +124,7 @@ def choose_profiles(choice=0) -> str:
                 app.delete_profile(profile_name)
             else :
                 return choose_profiles()
-
-    elif choice == 4:
-        beginFunction()
+            
     else:
         print("Invalid option! ")
         return choose_profiles()
