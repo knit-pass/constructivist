@@ -136,7 +136,33 @@ class App:
         self.__create_topic_relation(topic, level, categories_result)
         print("Topic created: ", topic, " : ", level)
 
-    #!-----------------------------------------------------------------------------------------
+    def __delete_profile(self, name):
+        with self.driver.session(database="neo4j") as session:
+            result = session.execute_write(self.__delete_profile_driver, name=name)
+            return result
+
+    @staticmethod
+    def __create_profile_driver(tx, name):
+        global user_profile
+
+        query = """
+            MERGE (p:Profile{name:$name})
+        """
+
+        tx.run(query, name=name)
+
+    @staticmethod
+    def __fetch_profiles_driver(tx):
+        global user_profile
+
+        query = """
+           MATCH (p:Profile)
+           RETURN p.name as profileNames
+        """
+        result = tx.run(query)
+
+        profile_names = [record["profileNames"] for record in result]
+        return profile_names
 
     @staticmethod
     def __normalize_weights_driver(tx):
@@ -181,7 +207,19 @@ class App:
         self.__normalize_weights()
         print("Weights Normalized")
 
-    #!-----------------------------------------------------------------------------------------
+    #!-------------------------------------------------------------------------------------------------
+
+    @staticmethod
+    def __delete_profile_driver(tx, name):
+        global user_profile
+        query = """
+            MATCH (p:Profile{name:$name})-[r1:KNOWS]->(c:Category)-[r2:HAS]->(l:Level)<-[r3:BELONGSTO]-(t:Topic)
+            DELETE r1
+            DELETE r2
+            DELETE r3
+            DELETE t,c,l,p
+        """
+        tx.run(query, name=name)
 
     @staticmethod
     def __fetch_weights_driver(tx, category):
@@ -253,43 +291,14 @@ class App:
             )
             return result
 
-    def fetch_weights(self, category):
-        self.category_data = self.__fetch_weights(category)
-        print("Weights fetched : ", category)
-
-    #!---------------------------------------------------------------------------------
-    @staticmethod
-    def __delete_profile_driver(tx, name):
-        global user_profile
-        query = """
-            MATCH (p:Profile{name:$name})-[r1:KNOWS]->(c:Category)-[r2:HAS]->(l:Level)<-[r3:BELONGSTO]-(t:Topic)
-            DELETE r1
-            DELETE r2
-            DELETE r3
-            DELETE t,c,l,p
-        """
-        result = tx.run(query, name=name)
-        return result
-
     def __delete_profile(self, name):
         with self.driver.session(database="neo4j") as session:
             result = session.execute_write(self.__delete_profile_driver, name=name)
             return result
 
-    def delete_profile(self, name):
-        return self.__delete_profile(name)
-
-    #!----------------------------------------------------------------------------------------
-
-    def __fetch_profiles_driver(tx):
-        query = "MATCH (p:Profile) RETURN p.name AS name"
-        result = tx.run(query).single()
-        return result
-
-    def __fetch_profiles(self):
-        with self.driver.session(database="neo4j") as session:
-            result = session.execute_write(self.__fetch_profiles_driver)
-            return result
+    def fetch_weights(self, category):
+        self.__fetch_weights(category)
+        print("Weights fetched : ", category)
 
     def fetch_profiles(self):
         data = self.__fetch_profiles()
@@ -360,16 +369,24 @@ categories = [
 
 
 def main_graph_test():
-    topic = "Inflation"
-    level = "Level1"
-    category = "Economy"
-    categories_data = {"Economy": 0.3592256255430859}
-    for i in categories:
-        app.create_new_category(i)
-    app.create_new_topic_relation(topic, level, categories_data)
-    print("DATA: ")
-    app.fetch_weights(category)
-    print(app.category_data)
-    app.fetch_profiles()
-    print(app.users)
+    # topic = "Inflation"
+    # level = "Level1"
+    # category = "Economy"
+    # for i in categories:
+    #     app.create_new_category(i)
+    # app.create_new_topic_relation(topic,level)
+    # app.assign_weights()
+    # app.normalize_weights()
+    # app.fetch_weights(category)
+    # print(app.fetch_profiles())
+    # app.create_profile("user2")
+    # app.delete_profile("user2")
     app.close()
+
+
+if __name__ == "__main__":
+    main_graph_test()
+
+# match (c:Category{name:"Entertainment"})-[:HAS]->(l:Level1)
+# create (t:Topic {name:"Tom Cruise"})
+# create (l)<-[:BELONGSTO {value : 10}]-(t)
