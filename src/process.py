@@ -28,8 +28,8 @@ def get_response_categories(response: str, threshold=50):
     level = get_rank(response)
     for i in entities:
         categories_result[i] = get_categories_cap(i, threshold)
-        app.create_new_topic_relation(topic, level, categories_result[i])
-        print(f"Created {topic} : Level {level}")
+        app.create_new_topic_relation(i, level, categories_result[i])
+        print(f"Created {i} : Level {level}")
     return categories_result
 
 
@@ -48,23 +48,34 @@ def create_prompt_data(prompt, threshold=50):
     ranks = ["topics_level1", "topics_level2", "topics_level3", "topics_level4"]
     ranks = ranks[:prompt_rank]
     prompt_context = {}
+    empty_flag = True
     for category in category_data:
-        print("> Category", category)
-        category_name = category["category"]
-        prompt_context[category_name] = {}
-        prompt_context[category_name]["confidence"] = category["weight"]
-        prompt_context[category_name]["concepts"] = []
-        for rank in ranks:
-            for concepts_of_rank in category[rank]:
-                concepts = []
-                for c in concepts_of_rank:
-                    concepts.append(c)
-                prompt_context[category_name]["concepts"].extend(concepts)
+        if category == {}:
+            continue
+        try:
+            print("> Category", category)
+            category_name = category["category"]
+            prompt_context[category_name] = {}
+            prompt_context[category_name]["confidence"] = category["weight"]
+            prompt_context[category_name]["concepts"] = []
+            for rank in ranks:
+                for concepts_of_rank in category[rank]:
+                    concepts = []
+                    for c in concepts_of_rank:
+                        concepts.append(c)
+                    prompt_context[category_name]["concepts"].extend(concepts)
+            empty_flag = False
+        except:
+            continue
 
-    final_prompt = "[CONTEXT]: \n"
-    final_prompt += str(prompt_context)
-    final_prompt += "\n\n"
+    final_prompt = ""
+    if not empty_flag:
+        final_prompt += "[CONTEXT]: \n"
+        final_prompt += str(prompt_context)
+        final_prompt += "\n\n"
     final_prompt += "[PROMPT]: "
     final_prompt += prompt
+    print("**************** FINAL PROMPT **********************")
     print(final_prompt)
+    print("****************************************************")
     return final_prompt

@@ -122,7 +122,7 @@ class App:
                     category=i,
                     value=float(category_result[i]),
                 )
-                print(result)
+                # print(result)
             except ServiceUnavailable as exception:
                 logging.error(
                     "{query} raised an error: \n {exception}".format(

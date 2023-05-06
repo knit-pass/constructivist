@@ -31,10 +31,11 @@ def beginFunction():
 
         if questionType == 3:
             print("Thank you!! exiting...")
+            app.close()
             break
 
         question = input("Enter prompt : ")
-        final_prompt = create_prompt_data(question)
+        final_prompt = create_prompt_data(question, 10)
         modifiedQuestion = final_prompt
         if questionType == 1:
             print("Modified Prompt : " + modifiedQuestion)
@@ -42,13 +43,13 @@ def beginFunction():
         elif questionType == 2:
             # solution = "This is a sample solution"
             solution = giveAnswer(create_prompt_data(question))  # uses API key
+            result = get_response_categories(solution)
             # print(type(solution))
 
             print(
                 "# ---------------------------------------------------------------------------- #"
             )
             print("\n")
-            app.close()
         else:
             print("Invalid input!!")
             continue
