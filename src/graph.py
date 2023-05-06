@@ -132,12 +132,14 @@ class App:
                 continue
             except Exception as e:
                 logging.error(e)
+                print(e)
                 continue
         return [row for row in result]
 
     def create_new_topic_relation(self, topic, level, categories_result):
         self.__create_topic_relation(topic, level, categories_result)
-        print("Topic created: ", topic, " : ", level)
+        self.normalize_weights()
+        print("Topic created and normalized: ", topic, " : ", level)
 
     #!-------------------------------------------------------------------------------------------------
 
@@ -196,30 +198,30 @@ class App:
         global user_profile
         result = []
         query_normalize_levels = (
-            "MATCH (p:Profile)-[:KNOWS]->(c:Category)"
-            "WITH collect(c) AS categories"
-            "UNWIND categories as category"
-            "MATCH (category)-[:HAS]->(l:Level)"
-            "WITH category,MAX(l.value) AS max_value"
-            "MATCH (category)-[:HAS]->(l:Level)"
-            "SET l.normalized_value ="
-            "CASE"
+            "MATCH (p:Profile)-[:KNOWS]->(c:Category) "
+            "WITH collect(c) AS categories "
+            "UNWIND categories as category "
+            "MATCH (category)-[:HAS]->(l:Level) "
+            "WITH category,MAX(l.value) AS max_value "
+            "MATCH (category)-[:HAS]->(l:Level) "
+            "SET l.normalized_value = "
+            "CASE "
             "WHEN max_value > 0 THEN l.value / max_value "
-            "ELSE 0"
-            "END"
-            "RETURN l"
+            "ELSE 0 "
+            "END "
+            "RETURN l "
         )
 
         query_normalize_categories = (
-            "MATCH (p:Profile)-[:KNOWS]->(c:Category)"
-            "WITH MAX(c.weight) AS max_value"
-            "MATCH (p:Profile)-[:KNOWS]->(c1:Category)"
-            "SET c1.normalized_weight="
-            "CASE"
-            "WHEN max_value > 0 THEN c1.weight / max_value"
-            "ELSE 0"
-            "END"
-            "RETURN c1"
+            "MATCH (p:Profile)-[:KNOWS]->(c:Category) "
+            "WITH MAX(c.weight) AS max_value "
+            "MATCH (p:Profile)-[:KNOWS]->(c1:Category) "
+            "SET c1.normalized_weight = "
+            "CASE "
+            "WHEN max_value > 0 THEN c1.weight / max_value "
+            "ELSE 0 "
+            "END "
+            "RETURN c1 "
         )
         result1 = tx.run(query_normalize_levels)
         result2 = tx.run(query_normalize_categories)
@@ -314,10 +316,6 @@ class App:
         result.append(data)
         return data
 
-    def assign_weights(self):
-        self.__assign_weights()
-        print("Weights Assigned")
-
     def fetch_weights(self, category):
         print("Weights fetched : ", category)
         return self.__fetch_weights(category)
@@ -390,6 +388,13 @@ def main_graph_test():
     # app.create_profile("user2")
     # app.delete_profile("user2")
     app.close()
+
+
+def init_graph():
+    global user_profile
+    app.create_profile(user_profile)
+    for category_name in categories:
+        app.create_new_category(category_name)
 
 
 if __name__ == "__main__":

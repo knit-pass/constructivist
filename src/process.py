@@ -26,9 +26,10 @@ def get_response_categories(response: str, threshold=50):
     entities = get_concepts(response)
     categories_result = {}
     level = get_rank(response)
+    level_names = ["Level1", "Level2", "Level3", "Level4"]
     for i in entities:
         categories_result[i] = get_categories_cap(i, threshold)
-        app.create_new_topic_relation(i, level, categories_result[i])
+        app.create_new_topic_relation(i, level_names[level - 1], categories_result[i])
         print(f"Created {i} : Level {level}")
     return categories_result
 
@@ -69,8 +70,8 @@ def create_prompt_data(prompt, threshold=50):
             continue
 
     final_prompt = ""
+    final_prompt += "[CONTEXT]: \n"
     if not empty_flag:
-        final_prompt += "[CONTEXT]: \n"
         final_prompt += str(prompt_context)
         final_prompt += "\n\n"
     final_prompt += "[PROMPT]: "

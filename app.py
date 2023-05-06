@@ -4,9 +4,11 @@ from src import *
 
 creds = dotenv_values("chatgpt_credentials.env")
 openai.api_key = creds["API_KEY"]
+first_time_run = False
 
 
 def beginFunction():
+    global first_time_run
     print(
         "# ---------------------------------------------------------------------------- #"
     )
@@ -16,7 +18,10 @@ def beginFunction():
     print(
         "# ---------------------------------------------------------------------------- #\n"
     )
-
+    if first_time_run:
+        init_graph()
+        print("Graph Initialized")
+        first_time_run = False
     # profileChoosen = choose_profiles()
 
     # print("Working on : ",profileChoosen)
