@@ -167,7 +167,7 @@ class App:
         with self.driver.session(database="neo4j") as session:
             result = session.execute_write(self.__delete_profile_driver, name=name)
             return result
-        
+
     @staticmethod
     def __create_profile_driver(tx, name):
         global user_profile
@@ -190,7 +190,7 @@ class App:
 
         profile_names = [record["profileNames"] for record in result]
         return profile_names
-    
+
     @staticmethod
     def __normalize_weights_driver(tx):
         global user_profile
@@ -233,13 +233,9 @@ class App:
 
     @staticmethod
     def __delete_profile_driver(tx, name):
-        global user_profile
         query = """
-            MATCH (p:Profile{name:$name})-[r1:KNOWS]->(c:Category)-[r2:HAS]->(l:Level)<-[r3:BELONGSTO]-(t:Topic)
-            DELETE r1
-            DELETE r2
-            DELETE r3
-            DELETE t,c,l,p
+        OPTIONAL MATCH (p:Profile{name:$name})-[r1:KNOWS]->(c:Category)-[r2:HAS]->(l:Level)<-[r3:BELONGSTO]-(t:Topic)
+            DETACH DELETE p, r1, c, r2, l, r3, t
         """
         tx.run(query, name=name)
 
@@ -289,21 +285,21 @@ class App:
                 continue
         for instance in record["topics_level2"]:
             if instance["topic"] != None and instance["value"] != None:
-                data["topics_level1"].append(
+                data["topics_level2"].append(
                     {str(instance["topic"]["name"]): float(instance["value"])}
                 )
             else:
                 continue
         for instance in record["topics_level3"]:
             if instance["topic"] != None and instance["value"] != None:
-                data["topics_level1"].append(
+                data["topics_level3"].append(
                     {str(instance["topic"]["name"]): float(instance["value"])}
                 )
             else:
                 continue
         for instance in record["topics_level4"]:
             if instance["topic"] != None and instance["value"] != None:
-                data["topics_level1"].append(
+                data["topics_level4"].append(
                     {str(instance["topic"]["name"]): float(instance["value"])}
                 )
             else:
@@ -313,16 +309,16 @@ class App:
         with open(fileName, "w") as f:
             json.dump(data, f)
 
-        return result
-
+        result.append(data)
+        return data
 
     def assign_weights(self):
         self.__assign_weights()
         print("Weights Assigned")
 
     def fetch_weights(self, category):
-        self.__fetch_weights(category)
         print("Weights fetched : ", category)
+        return self.__fetch_weights(category)
 
     def fetch_profiles(self):
         return self.__fetch_profiles()
@@ -381,14 +377,14 @@ categories = [
 def main_graph_test():
     # topic = "Inflation"
     # level = "Level1"
-    # category = "Economy"
+    category = "Economy"
     # for i in categories:
     #     app.create_new_category(i)
     # app.create_new_topic_relation(topic,level)
     # app.assign_weights()
     # app.normalize_weights()
-    # app.fetch_weights(category)
-    print(app.fetch_profiles())
+    print(app.fetch_weights(category))
+    # print(app.fetch_profiles())
     # app.create_profile("user2")
     # app.delete_profile("user2")
     app.close()

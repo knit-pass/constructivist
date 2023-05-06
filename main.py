@@ -3,8 +3,8 @@ from src import *
 
 def main():
     Logger.start_log()
-    data = get_categories_cap("Inflation", 50)
-    main_graph_test(data)
+    create_prompt_data("What is economic instability?")
+    # graph_test()
     Logger.end_log()
 
 

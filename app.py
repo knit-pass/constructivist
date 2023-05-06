@@ -19,8 +19,6 @@ def beginFunction():
 
     # profileChoosen = choose_profiles()
 
-
-
     # print("Working on : ",profileChoosen)
     print("MENU : ")
     print("1.Give modified prompt  2.Give solution  3.Exit\n")
@@ -28,7 +26,7 @@ def beginFunction():
     while True:
         questionType = int(input("Enter 1/2/3 : "))
 
-        if(type(questionType)!=int):
+        if type(questionType) != int:
             continue
 
         if questionType == 3:
@@ -39,8 +37,8 @@ def beginFunction():
         promptCategories = get_prompt_categories(question)
         userKnowledge = []
         print(promptCategories)
-        for key,value in promptCategories.items():
-            userKnowledge.append(fetch_category_data(key,50))
+        for key, value in promptCategories.items():
+            userKnowledge.append(fetch_category_data(key, 50))
         print(userKnowledge)
 
         # call function to modify question using graph and store in newQuestion
@@ -51,14 +49,14 @@ def beginFunction():
 
         elif questionType == 2:
             # solution = "This is a sample solution"
-            solution = giveAnswer(question) # uses API key
+            solution = giveAnswer(question)  # uses API key
             print(type(solution))
-            
+
             print(
                 "# ---------------------------------------------------------------------------- #"
             )
             print("\n")
-        else :
+        else:
             print("Invalid input!!")
             continue
 
@@ -67,13 +65,14 @@ def beginFunction():
 def giveAnswer(message):
     messages = [{"role": "user", "content": "You are a intelligent assistant."}]
     if message:
-        messages.append({"role": "user", "content": message},)
+        messages.append(
+            {"role": "user", "content": message},
+        )
         chat = openai.ChatCompletion.create(model="gpt-3.5-turbo", messages=messages)
     reply = chat.choices[0].message.content
     print(f"ChatGPT: {reply}")
     messages.append({"role": "assistant", "content": reply})
     return reply
-    
 
 
 def choose_profiles(choice=0) -> str:
@@ -86,10 +85,10 @@ def choose_profiles(choice=0) -> str:
         print("Enter your choice: ")
         choice = int(input())
     profile = ""
-   
+
     available_profiles = app.fetch_profiles()
     # function called from graph.py
-    
+
     # Create new profile
     if choice == 1:
         print("Enter the name of new profile: ")
@@ -98,9 +97,9 @@ def choose_profiles(choice=0) -> str:
             print("Duplicate profile!")
             profile = choose_profiles(1)
         print("The profile is: ", profile)
-        
+
         app.create_profile(profile)
-        #function called from graph.py
+        # function called from graph.py
 
         return profile
     # Choose existing profile
@@ -110,11 +109,11 @@ def choose_profiles(choice=0) -> str:
         #     print(f"{idx+1}. i")
         idx = 1
         for i in available_profiles:
-            print(str(idx)," : ",i)
-            idx = idx+1
+            print(str(idx), " : ", i)
+            idx = idx + 1
         print("Choose your profile: ")
         profileIndex = int(input())
-        if profileIndex > len(available_profiles) or profileIndex< 0:
+        if profileIndex > len(available_profiles) or profileIndex < 0:
             choose_profiles(2)
         else:
             # TODO: Choose profile logic
@@ -126,8 +125,8 @@ def choose_profiles(choice=0) -> str:
         print("Available profiles to delete: ")
         idx = 1
         for i in available_profiles:
-            print(str(idx)," : ",i)
-            idx = idx+1
+            print(str(idx), " : ", i)
+            idx = idx + 1
         print("Choose the profile to delete: ")
         profileIndex = int(input())
         if profileIndex > len(available_profiles) or profileIndex < 0:
@@ -136,14 +135,14 @@ def choose_profiles(choice=0) -> str:
         else:
             profile_name = available_profiles[profileIndex - 1]
             # TODO: Delete Logic
-            print("Are you sure you want to delete the entire data of : ",profile_name)
+            print("Are you sure you want to delete the entire data of : ", profile_name)
             print("Y/N ?")
             ack = input()
-            if(ack=='Y'or ack=='y'):
+            if ack == "Y" or ack == "y":
                 app.delete_profile(profile_name)
                 available_profiles = app.fetch_profiles()
                 return choose_profiles()
-            else :
+            else:
                 return choose_profiles()
 
     else:
@@ -155,7 +154,7 @@ def init_new_profile(name: str = "") -> bool:
     if name == "":
         print("Invalid new profile!")
         return False
-    print("How you want to start a new profile")
+    print("How do you want to start a new profile")
     print("1. Nothing")
     print("2. Initial data")
     print("Choose: ")
