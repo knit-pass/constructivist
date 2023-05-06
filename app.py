@@ -34,36 +34,56 @@ def beginFunction():
             break
 
         question = input("Enter prompt : ")
-        promptCategories = get_prompt_categories(question)
-        userKnowledge = []
-        print(promptCategories)
-        for key, value in promptCategories.items():
-            userKnowledge.append(fetch_category_data(key, 50))
-        print(userKnowledge)
-
-        # call function to modify question using graph and store in newQuestion
-        modifiedQuestion = "This is a new sample prompt"
-
+        final_prompt = create_prompt_data(question)
+        modifiedQuestion = final_prompt
         if questionType == 1:
-            print("New Prompt : " + modifiedQuestion)
+            print("Modified Prompt : " + modifiedQuestion)
 
         elif questionType == 2:
             # solution = "This is a sample solution"
-            solution = giveAnswer(question)  # uses API key
-            print(type(solution))
+            solution = giveAnswer(create_prompt_data(question))  # uses API key
+            # print(type(solution))
 
             print(
                 "# ---------------------------------------------------------------------------- #"
             )
             print("\n")
+            app.close()
         else:
             print("Invalid input!!")
             continue
 
 
+init_prompt = """
+    From now on I will be giving context information to you along with a prompt. The context information denotes the knowledge I already have. You should give response to the prompt in such a way that I should be able to relate the response with the context. It is not compulsory that you should relate to every concept in the context. Irrelevant concepts can be omitted. Don't ever acknowledge that I know about these concepts/domains. Just include them in the response if necessary.
+    Context is provided in JSON format denoted by [CONTEXT]. JSON object is the object of different domains that I know about. JSON format is as follows, the keys denote the domain of the information and the value is an object with 'confidence' denoting the amount of knowledge I have. Followed by 'concepts' which is an array of concepts I know in that domain. \n
+    Example:
+    [CONTEXT]:
+    {
+    “Technology” : {
+    “confidence”:34.20,
+    “concepts”:['AI','Blockchain']
+    },
+    “Physics”: {
+                “confidence”: 12.45,
+                “concepts”:['Quantum Physics','Mechanics']
+    }	
+    }
+    \n
+    In this example, I want my responses to have the context of 2 domains. They are Technology and Finance. About Technology, my confidence score is about 34.20 and I know about AI and blockchain. In Physics my confidence score is about 12.45 and I know about Quantum Physics and Mechanics.
+    \n
+    My prompt will be denoted by [PROMPT]: everything followed by that is the prompt which you should respond to. 
+"""
+
+
 # this function uses API key to generate results
 def giveAnswer(message):
-    messages = [{"role": "user", "content": "You are a intelligent assistant."}]
+    messages = [
+        {"role": "user", "content": "You are a intelligent assistant."},
+        {"role": "assistant", "content": "Ok. Thank you."},
+        {"role": "user", "content": init_prompt},
+        {"role": "assistant", "content": "Sure, please proceed."},
+    ]
     if message:
         messages.append(
             {"role": "user", "content": message},

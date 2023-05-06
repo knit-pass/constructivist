@@ -4,7 +4,7 @@ from src import *
 def main():
     Logger.start_log()
     create_prompt_data("What is economic instability?")
-    # graph_test()
+    app.close()
     Logger.end_log()
 
 

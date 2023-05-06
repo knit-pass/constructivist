@@ -67,5 +67,4 @@ def create_prompt_data(prompt, threshold=50):
     final_prompt += "[PROMPT]: "
     final_prompt += prompt
     print(final_prompt)
-    app.close()
     return final_prompt

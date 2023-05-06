@@ -267,44 +267,46 @@ class App:
             """
 
         record = tx.run(query, category=category).single()
-        data = {
-            "category": record["name"],
-            "weight": record["weight"],
-            "normalized_weight": record["normalized_weight"],
-            "topics_level1": [],
-            "topics_level2": [],
-            "topics_level3": [],
-            "topics_level4": [],
-        }
-        for instance in record["topics_level1"]:
-            if instance["topic"] != None and instance["value"] != None:
-                data["topics_level1"].append(
-                    {str(instance["topic"]["name"]): float(instance["value"])}
-                )
-            else:
-                continue
-        for instance in record["topics_level2"]:
-            if instance["topic"] != None and instance["value"] != None:
-                data["topics_level2"].append(
-                    {str(instance["topic"]["name"]): float(instance["value"])}
-                )
-            else:
-                continue
-        for instance in record["topics_level3"]:
-            if instance["topic"] != None and instance["value"] != None:
-                data["topics_level3"].append(
-                    {str(instance["topic"]["name"]): float(instance["value"])}
-                )
-            else:
-                continue
-        for instance in record["topics_level4"]:
-            if instance["topic"] != None and instance["value"] != None:
-                data["topics_level4"].append(
-                    {str(instance["topic"]["name"]): float(instance["value"])}
-                )
-            else:
-                continue
-
+        try:
+            data = {
+                "category": record["name"],
+                "weight": record["weight"],
+                "normalized_weight": record["normalized_weight"],
+                "topics_level1": [],
+                "topics_level2": [],
+                "topics_level3": [],
+                "topics_level4": [],
+            }
+            for instance in record["topics_level1"]:
+                if instance["topic"] != None and instance["value"] != None:
+                    data["topics_level1"].append(
+                        {str(instance["topic"]["name"]): float(instance["value"])}
+                    )
+                else:
+                    continue
+            for instance in record["topics_level2"]:
+                if instance["topic"] != None and instance["value"] != None:
+                    data["topics_level2"].append(
+                        {str(instance["topic"]["name"]): float(instance["value"])}
+                    )
+                else:
+                    continue
+            for instance in record["topics_level3"]:
+                if instance["topic"] != None and instance["value"] != None:
+                    data["topics_level3"].append(
+                        {str(instance["topic"]["name"]): float(instance["value"])}
+                    )
+                else:
+                    continue
+            for instance in record["topics_level4"]:
+                if instance["topic"] != None and instance["value"] != None:
+                    data["topics_level4"].append(
+                        {str(instance["topic"]["name"]): float(instance["value"])}
+                    )
+                else:
+                    continue
+        except:
+            data = {}
         fileName = "data/" + category + ".json"
         with open(fileName, "w") as f:
             json.dump(data, f)
