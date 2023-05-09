@@ -195,18 +195,18 @@ class App:
         global user_profile
         result = []
         query_normalize_levels = (
-            "MATCH (p:Profile{name:$name})-[:KNOWS]->(c:Category) "
+            "MATCH (p:Profile {name: $name})-[:KNOWS]->(c:Category) "
             "WITH collect(c) AS categories "
             "UNWIND categories as category "
             "MATCH (category)-[:HAS]->(l:Level) "
-            "WITH category,MAX(l.value) AS max_value "
+            "WITH category, MAX(l.value) AS max_value "
             "MATCH (category)-[:HAS]->(l:Level) "
-            "SET l.normalized_value ="
-            "CASE"
+            "SET l.normalized_value = "
+            "CASE "
             "WHEN max_value > 0 THEN l.value / max_value "
-            "ELSE 0"
-            "END"
-            "RETURN l"
+            "ELSE 0 "
+            "END "
+            "RETURN l "
         )
 
         query_normalize_categories = (

@@ -34,6 +34,7 @@ def get_response_categories(response: str, threshold=50):
         categories_result[i] = get_categories_cap(i, threshold)
         app.create_new_topic_relation(i, level_names[level - 1], categories_result[i])
         print(f"Created {i} : Level {level}")
+    app.normalize_weights()
     return categories_result
 
 
