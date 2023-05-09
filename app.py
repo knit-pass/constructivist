@@ -74,7 +74,7 @@ init_prompt = """
                 “confidence”: 12.45,
                 “concepts”:['Quantum Physics','Mechanics']
     }	
-    }
+    }\n
     \n
     In this example, I want my responses to have the context of 2 domains. They are Technology and Finance. About Technology, my confidence score is about 34.20 and I know about AI and blockchain. In Physics my confidence score is about 12.45 and I know about Quantum Physics and Mechanics.
     \n
@@ -197,7 +197,4 @@ def init_new_profile(name: str = "") -> bool:
 
 
 if __name__ == "__main__":
-    # print("Chosen Profile: ", choose_profiles())
     beginFunction()
-    # print(giveAnswer("who is narendra modi")) # function uses API key
-    # beginFunction()

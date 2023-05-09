@@ -1,9 +1,10 @@
 from src import *
+from .app import *
 
 
 def main():
     Logger.start_log()
-    create_prompt_data("What is economic instability?")
+    beginFunction()
     app.close()
     Logger.end_log()
 

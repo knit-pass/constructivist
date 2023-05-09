@@ -103,7 +103,7 @@ class App:
         global user_profile
         result = []
         query = (
-            "MATCH (c:Category {name : $category})-[:HAS]->(l:Level {name : $level}) "
+            "MATCH (p:Profile{name:$name})-[:KNOWS]->(c:Category {name : $category})-[:HAS]->(l:Level {name : $level}) "
             "MERGE (t:Topic {name : $topic}) "
             "MERGE (l)<-[b:BELONGSTO]-(t) "
             "ON CREATE SET b.value = 0 "
@@ -121,6 +121,7 @@ class App:
                     level=level,
                     category=i,
                     value=float(category_result[i]),
+                    name=user_profile,
                 )
                 # print(result)
             except ServiceUnavailable as exception:
@@ -132,14 +133,12 @@ class App:
                 continue
             except Exception as e:
                 logging.error(e)
-                print(e)
                 continue
         return [row for row in result]
 
     def create_new_topic_relation(self, topic, level, categories_result):
         self.__create_topic_relation(topic, level, categories_result)
-        self.normalize_weights()
-        print("Topic created and normalized: ", topic, " : ", level)
+        print("Topic created: ", topic, " : ", level)
 
     #!-------------------------------------------------------------------------------------------------
 
@@ -172,8 +171,6 @@ class App:
 
     @staticmethod
     def __create_profile_driver(tx, name):
-        global user_profile
-
         query = """
             MERGE (p:Profile{name:$name})
         """
@@ -198,22 +195,22 @@ class App:
         global user_profile
         result = []
         query_normalize_levels = (
-            "MATCH (p:Profile)-[:KNOWS]->(c:Category) "
+            "MATCH (p:Profile{name:$name})-[:KNOWS]->(c:Category) "
             "WITH collect(c) AS categories "
             "UNWIND categories as category "
             "MATCH (category)-[:HAS]->(l:Level) "
             "WITH category,MAX(l.value) AS max_value "
             "MATCH (category)-[:HAS]->(l:Level) "
-            "SET l.normalized_value = "
-            "CASE "
+            "SET l.normalized_value ="
+            "CASE"
             "WHEN max_value > 0 THEN l.value / max_value "
-            "ELSE 0 "
-            "END "
-            "RETURN l "
+            "ELSE 0"
+            "END"
+            "RETURN l"
         )
 
         query_normalize_categories = (
-            "MATCH (p:Profile)-[:KNOWS]->(c:Category) "
+            "MATCH (p:Profile{name:$name})-[:KNOWS]->(c:Category) "
             "WITH MAX(c.weight) AS max_value "
             "MATCH (p:Profile)-[:KNOWS]->(c1:Category) "
             "SET c1.normalized_weight = "
@@ -223,8 +220,8 @@ class App:
             "END "
             "RETURN c1 "
         )
-        result1 = tx.run(query_normalize_levels)
-        result2 = tx.run(query_normalize_categories)
+        result1 = tx.run(query_normalize_levels, name=user_profile)
+        result2 = tx.run(query_normalize_categories, name=user_profile)
         return [result1, result2]
 
     def normalize_weights(self):
@@ -244,77 +241,17 @@ class App:
     @staticmethod
     def __fetch_weights_driver(tx, category):
         global user_profile
-
-        result = []
-        # query = (
-        #     "MATCH (c:Category)-[:HAS]->(l1:Level {name:'Level1'}) "
-        #     "MATCH (c:Category)-[:HAS]->(l2:Level {name:'Level2'}) "
-        #     "MATCH (c:Category)-[:HAS]->(l3:Level {name:'Level3'}) "
-        #     "MATCH (c:Category)-[:HAS]->(l4:Level {name:'Level4'}) "
-        #     "WHERE c.name = $category "
-        #     "RETURN c, l1, l2, l3, l4"
-        # )
         query = """
-            MATCH (c:Category{name:$category})-[:HAS]->(l:Level{name:'Level1'})<-[rel1:BELONGSTO]-(t1:Topic)
-            OPTIONAL MATCH (c)-[:HAS]->(l2:Level{name:'Level2'})<-[rel2:BELONGSTO]-(t2:Topic)
-            OPTIONAL MATCH (c)-[:HAS]->(l3:Level{name:'Level3'})<-[rel3:BELONGSTO]-(t3:Topic)
-            OPTIONAL MATCH (c)-[:HAS]->(l4:Level{name:'Level4'})<-[rel4:BELONGSTO]-(t4:Topic)
-            RETURN COALESCE(c.name) as name, 
-                COALESCE(c.weight,'null') as weight, 
-                COALESCE(c.normalized_weight,'null') as normalized_weight, 
-                COALESCE(COLLECT(DISTINCT {topic: t1, value: rel1.value}),[]) as topics_level1,
-                COALESCE(COLLECT(DISTINCT {topic: t2, value: rel2.value}),[]) as topics_level2,
-                COALESCE(COLLECT(DISTINCT {topic: t3, value: rel3.value}),[]) as topics_level3,
-                COALESCE(COLLECT(DISTINCT {topic: t4, value: rel4.value}),[]) as topics_level4
-            """
+            MATCH (p:Profile{name:$name})-[r1:KNOWS]->(c:Category{name:$category})-[r2:HAS]->(l:Level)<-[r3:BELONGSTO]-(t:Topic)
+            RETURN t.name AS Topic,r3.value as TopicValue, l.name AS Level, l.value AS LevelValue, c.weight as CategoryWeight,c.name as Category
+        """
+        records = tx.run(query, category=category, name=user_profile).data()
+        print("DATA", records)
+        return records
 
-        record = tx.run(query, category=category).single()
-        try:
-            data = {
-                "category": record["name"],
-                "weight": record["weight"],
-                "normalized_weight": record["normalized_weight"],
-                "topics_level1": [],
-                "topics_level2": [],
-                "topics_level3": [],
-                "topics_level4": [],
-            }
-            for instance in record["topics_level1"]:
-                if instance["topic"] != None and instance["value"] != None:
-                    data["topics_level1"].append(
-                        {str(instance["topic"]["name"]): float(instance["value"])}
-                    )
-                else:
-                    continue
-            for instance in record["topics_level2"]:
-                if instance["topic"] != None and instance["value"] != None:
-                    data["topics_level2"].append(
-                        {str(instance["topic"]["name"]): float(instance["value"])}
-                    )
-                else:
-                    continue
-            for instance in record["topics_level3"]:
-                if instance["topic"] != None and instance["value"] != None:
-                    data["topics_level3"].append(
-                        {str(instance["topic"]["name"]): float(instance["value"])}
-                    )
-                else:
-                    continue
-            for instance in record["topics_level4"]:
-                if instance["topic"] != None and instance["value"] != None:
-                    data["topics_level4"].append(
-                        {str(instance["topic"]["name"]): float(instance["value"])}
-                    )
-                else:
-                    continue
-        except:
-            data = {}
-        fileName = "data/" + category + ".json"
-        with open(fileName, "w") as f:
-            json.dump(data, f)
-
-        result.append(data)
-        return data
+    def assign_weights(self):
+        self.__assign_weights()
+        print("Weights Assigned")
 
     def fetch_weights(self, category):
         print("Weights fetched : ", category)
@@ -331,13 +268,19 @@ class App:
         self.__delete_profile(name)
         print("Profile Deleted :", name)
 
+    def set_user_profile(name):
+        global user_profile
+        user_profile = name
+
 
 creds = dotenv_values("neo4j_credentials.env")
 uri = creds["NEO4J_URI"]
 user = creds["NEO4J_USERNAME"]
 password = creds["NEO4J_PASSWORD"]
-user_profile = "user1"  # Root node of the graph
+user_profile = "user1"
+# Root node of the graph
 app = App(uri, user, password)
+
 
 categories = [
     "Academic discipline",
@@ -374,32 +317,16 @@ categories = [
 ]
 
 
-def main_graph_test():
-    # topic = "Inflation"
-    # level = "Level1"
-    category = "Economy"
-    # for i in categories:
-    #     app.create_new_category(i)
-    # app.create_new_topic_relation(topic,level)
-    # app.assign_weights()
-    # app.normalize_weights()
-    print(app.fetch_weights(category))
-    # print(app.fetch_profiles())
-    # app.create_profile("user2")
-    # app.delete_profile("user2")
+def init_graph():
+    for i in categories:
+        app.create_new_category(i)
+
+
+def test_graph():
+    for c in categories:
+        app.fetch_weights(c)
     app.close()
 
 
-def init_graph():
-    global user_profile
-    app.create_profile(user_profile)
-    for category_name in categories:
-        app.create_new_category(category_name)
-
-
 if __name__ == "__main__":
-    main_graph_test()
-
-# match (c:Category{name:"Entertainment"})-[:HAS]->(l:Level1)
-# create (t:Topic {name:"Tom Cruise"})
-# create (l)<-[:BELONGSTO {value : 10}]-(t)
+    test_graph()
