@@ -4,7 +4,7 @@ from .logger import *
 from .readability import *
 from .transformers import *
 
-nlp = spacy.load("en_core_web_lg")
+nlp = spacy.load("en_core_web_sm")
 
 
 # Functions to process prompt
@@ -16,13 +16,16 @@ def get_rank(prompt: str):
     return get_readability_rank(prompt)
 
 
-def get_concepts(sentence: str):
-    nouns = []
+def get_concepts(sentence):
     doc = nlp(sentence)
-    for entity in doc.ents:
-        nouns.append(entity.text.lower())
-        print("Fetched: ", entity.text.lower())
-    return nouns
+    noun_chunks = []
+    for chunk in doc.noun_chunks:
+        if chunk.root.pos_ == "NOUN":
+            filtered_chunk = " ".join(
+                token.text for token in chunk if token.pos_ != "DET"
+            )
+            noun_chunks.append(filtered_chunk.lower())
+    return noun_chunks
 
 
 def get_response_categories(response: str, threshold=50):

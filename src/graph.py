@@ -53,6 +53,7 @@ class App:
             f"WHERE u.name = '{user_profile}'"
             "MERGE (u)-[r:KNOWS]->(t:Category {name : $category}) "
             "ON CREATE SET t.weight = 0.0 "
+            "ON CREATE SET t.normalized_weight = 0.0 "
             "MERGE (t)-[:HAS]->(l1:Level {name: 'Level1'}) "
             "ON CREATE SET l1.value = 0.0 "
             "MERGE (t)-[:HAS]->(l2:Level {name: 'Level2'}) "
@@ -320,6 +321,7 @@ categories = [
 def init_graph():
     for i in categories:
         app.create_new_category(i)
+    app.close()
 
 
 def test_graph():
@@ -329,4 +331,5 @@ def test_graph():
 
 
 if __name__ == "__main__":
-    test_graph()
+    init_graph()
+    # test_graph()
