@@ -60,7 +60,7 @@ def get_categories_cap(entity: str, tp=10):
         for idx, i in enumerate(result_p):
             result_p[idx] += i * balance
             result_dictionary[result_c[idx]] = result_p[idx]
-        Logger.write_debug(f"Categories fetched for(cap): {entity}")
+        Logger.write_debug(f"Categories fetched for: {entity}")
         Logger.write_debug(str(result_dictionary))
     except Exception as e:
         Logger.write_error(str(e))
@@ -75,15 +75,8 @@ def get_categories(entity: str):
         result_p = result["scores"]
         for idx, i in enumerate(result_p):
             result_dictionary[result_c[idx]] = result_p[idx]
-        Logger.write_debug(f"Categories fetched for: {entity}")
         Logger.write_debug(str(result_dictionary))
+        Logger.write_debug(f"Categories fetched for: {entity}")
     except Exception as e:
         Logger.write_error(str(e))
     return result_dictionary
-
-
-def transformers_demo():
-    result = get_categories("Inflation")
-    with open("data/category.json") as f:
-        json.dump(result, f)
-    get_categories_cap("Inflation")

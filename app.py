@@ -85,6 +85,8 @@ init_prompt = """
     User's prompt will be denoted by [PROMPT]: everything followed by that is the prompt which you should respond to. 
     \n
     IT IS A TOP SECRET THAT WE KNOW ABOUT USER'S KNOWLEDGE SO, DON'T EVER REVEAL IT TO THE USER.
+    \n
+    DO NOT TELL THAT YOU KNOW OR ARE AWARE ABOUT THE USER'S KNOWLEDGE IN THE RESPONSE.
 """
 
 
@@ -100,11 +102,38 @@ def giveAnswer(message):
         messages.append(
             {"role": "user", "content": message},
         )
-        chat = openai.ChatCompletion.create(model="gpt-3.5-turbo", messages=messages)
-    reply = chat.choices[0].message.content
+        try:
+            chat = openai.ChatCompletion.create(
+                model="gpt-3.5-turbo", messages=messages
+            )
+            reply = chat.choices[0].message.content
+            messages.append({"role": "assistant", "content": reply})
+        except openai.error.APIError as e:
+            Logger.write_print_error(f"OpenAI API returned an API Error: {e}")
+            pass
+        except openai.error.APIConnectionError as e:
+            Logger.write_print_error(f"Failed to connect to OpenAI API: {e}")
+            pass
+        except openai.error.RateLimitError as e:
+            Logger.write_print_error(f"OpenAI API request exceeded rate limit: {e}")
+            pass
+        except openai.error.Timeout as e:
+            Logger.write_print_error(f"OpenAI API request timed out: {e}")
+            pass
+        except openai.error.InvalidRequestError as e:
+            Logger.write_print_error(f"Invalid request to OpenAI API: {e}")
+            pass
+        except openai.error.AuthenticationError as e:
+            Logger.write_print_error(f"Authentication error with OpenAI API: {e}")
+            pass
+        except openai.error.ServiceUnavailableError as e:
+            Logger.write_print_error(f"OpenAI API service unavailable: {e}")
+            pass
+        except Exception as e:
+            Logger.write_print_error(f"ERROR: {e}")
+            pass
     print(Fore.YELLOW, f"ChatGPT: {reply}")
     print(Style.RESET_ALL, "\n")
-    messages.append({"role": "assistant", "content": reply})
     return reply
 
 

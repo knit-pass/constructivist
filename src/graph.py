@@ -1,6 +1,6 @@
 import json
 import logging
-
+from .logger import Logger
 from dotenv import dotenv_values
 from neo4j import GraphDatabase
 from neo4j.exceptions import ServiceUnavailable
@@ -80,11 +80,11 @@ class App:
         # res = self.__check_category(category)
         # if not res:
         #     self.__create_category(category)
-        #     print("Category created: ", category)
+        #     Logger.write_debug("Category created: ", category)
         # else:
-        #     print("Category already exists: ", category)
+        #     Logger.write_debug("Category already exists: ", category)
         self.__create_category(category)
-        print("Category created: ", category)
+        Logger.write_debug("Category created: " + str(category))
 
     #!--------------------------------------------------------------------------------------------------
 
@@ -124,22 +124,22 @@ class App:
                     value=float(category_result[i]),
                     name=user_profile,
                 )
-                # print(result)
+                # Logger.write_debug(result)
             except ServiceUnavailable as exception:
-                logging.error(
+                Logger.write_error(
                     "{query} raised an error: \n {exception}".format(
                         query=query, exception=exception
                     )
                 )
                 continue
             except Exception as e:
-                logging.error(e)
+                Logger.write_error(e)
                 continue
         return [row for row in result]
 
     def create_new_topic_relation(self, topic, level, categories_result):
         self.__create_topic_relation(topic, level, categories_result)
-        print("Topic created: ", topic, " : ", level)
+        Logger.write_debug("Topic created: " + str(topic) + " : " + str(level))
 
     #!-------------------------------------------------------------------------------------------------
 
@@ -227,7 +227,7 @@ class App:
 
     def normalize_weights(self):
         self.__normalize_weights()
-        print("Weights Normalized")
+        Logger.write_debug("Weights Normalized")
 
     #!-------------------------------------------------------------------------------------------------
 
@@ -247,15 +247,15 @@ class App:
             RETURN t.name AS Topic,r3.value as TopicValue, l.name AS Level, l.value AS LevelValue, c.weight as CategoryWeight,c.name as Category
         """
         records = tx.run(query, category=category, name=user_profile).data()
-        print("DATA", records)
+        Logger.write_debug("DATA " + str(records))
         return records
 
     def assign_weights(self):
         self.__assign_weights()
-        print("Weights Assigned")
+        Logger.write_debug("Weights Assigned")
 
     def fetch_weights(self, category):
-        print("Weights fetched : ", category)
+        Logger.write_debug("Weights fetched : " + str(category))
         return self.__fetch_weights(category)
 
     def fetch_profiles(self):
@@ -263,11 +263,11 @@ class App:
 
     def create_profile(self, name):
         self.__create_profile(name)
-        print("Profile created : ", name)
+        Logger.write_debug("Profile created : " + name)
 
     def delete_profile(self, name):
         self.__delete_profile(name)
-        print("Profile Deleted :", name)
+        Logger.write_debug("Profile Deleted :" + name)
 
     def set_user_profile(name):
         global user_profile
