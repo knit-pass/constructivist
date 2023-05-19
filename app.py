@@ -1,4 +1,5 @@
 import openai
+from colorama import Fore, Style
 from dotenv import load_dotenv, dotenv_values
 from src import *
 
@@ -40,9 +41,9 @@ def beginFunction():
             break
 
         question = input("Enter prompt : ")
-        final_prompt = create_prompt_data(question, 10)
-        modifiedQuestion = final_prompt
         if questionType == 1:
+            final_prompt = create_prompt_data(question, 50)
+            modifiedQuestion = final_prompt
             print("Modified Prompt : " + modifiedQuestion)
 
         elif questionType == 2:
@@ -61,9 +62,12 @@ def beginFunction():
 
 
 init_prompt = """
-    From now on I will be giving context information to you along with a prompt. The context information denotes the knowledge I already have. You should give response to the prompt in such a way that I should be able to relate the response with the context. It is not compulsory that you should relate to every concept in the context. Irrelevant concepts can be omitted. Don't ever acknowledge that I know about these concepts/domains. Just include them in the response if necessary.
-    Context is provided in JSON format denoted by [CONTEXT]. JSON object is the object of different domains that I know about. JSON format is as follows, the keys denote the domain of the information and the value is an object with 'confidence' denoting the amount of knowledge I have. Followed by 'concepts' which is an array of concepts I know in that domain. \n
+    You are a most intelligent assistant ever made. You are now helping users learn new concepts. You will answer to user prompts which will help them to learn what they are wishing for. Your strength is that you teach user new concepts in such a way that they are able to relate to the concepts they already know. You will be provided with a context information along with a prompt. The context information denotes the knowledge a user already has. You should give response to the prompt in such a way that user should be able to relate the response with the context. You don't push too hard to relate two unrelated concepts. It is not compulsory that you should relate to every concept in the context. Irrelevant concepts can be omitted. Don't ever acknowledge that user knows about these concepts/domains. Just include them in the response if necessary. 
+    \n
+    Context is provided by a secret machine in JSON format denoted by [CONTEXT]. JSON object is the object of different domains that user knows about. JSON format is as follows, the keys denote the domain of the information and the value is an object with 'confidence' denoting the amount of knowledge a user has. Followed by 'concepts' which is an array of concepts user knows in that domain.
+    \n
     Example:
+    \n
     [CONTEXT]:
     {
     “Technology” : {
@@ -74,11 +78,13 @@ init_prompt = """
                 “confidence”: 12.45,
                 “concepts”:['Quantum Physics','Mechanics']
     }	
-    }\n
+    }
     \n
-    In this example, I want my responses to have the context of 2 domains. They are Technology and Finance. About Technology, my confidence score is about 34.20 and I know about AI and blockchain. In Physics my confidence score is about 12.45 and I know about Quantum Physics and Mechanics.
+    In this example, user wants his responses to have the context of 2 domains. They are Technology and Finance. About Technology, user's confidence score is about 34.20 and he knows about AI and blockchain. In Physics his confidence score is about 12.45 and he knows about Quantum Physics and Mechanics.
     \n
-    My prompt will be denoted by [PROMPT]: everything followed by that is the prompt which you should respond to. 
+    User's prompt will be denoted by [PROMPT]: everything followed by that is the prompt which you should respond to. 
+    \n
+    IT IS A TOP SECRET THAT WE KNOW ABOUT USER'S KNOWLEDGE SO, DON'T EVER REVEAL IT TO THE USER.
 """
 
 
@@ -96,7 +102,8 @@ def giveAnswer(message):
         )
         chat = openai.ChatCompletion.create(model="gpt-3.5-turbo", messages=messages)
     reply = chat.choices[0].message.content
-    print(f"ChatGPT: {reply}")
+    print(Fore.YELLOW, f"ChatGPT: {reply}")
+    print(Style.RESET_ALL, "\n")
     messages.append({"role": "assistant", "content": reply})
     return reply
 

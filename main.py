@@ -1,11 +1,10 @@
-from src import *
-from .app import *
+from app import *
+from src import Logger
 
 
 def main():
     Logger.start_log()
     beginFunction()
-    app.close()
     Logger.end_log()
 
 
