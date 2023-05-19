@@ -1,3 +1,6 @@
+# ---------------------------------------------------------------------------- #
+#                                    app.py                                    #
+# ---------------------------------------------------------------------------- #
 import openai
 from colorama import Fore, Style
 from dotenv import load_dotenv, dotenv_values
