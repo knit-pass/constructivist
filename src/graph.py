@@ -14,12 +14,6 @@ class App:
         self.driver.close()
 
     # ---------------- Functions to check if the category exists ---------------- #
-    def __check_category(self, category):
-        with self.driver.session(database="neo4j") as session:
-            result = session.execute_write(
-                self.__check_category_driver, category=category
-            )
-            return result
 
     @staticmethod
     def __check_category_driver(tx, category):
@@ -36,15 +30,14 @@ class App:
             )
             raise
 
-    # ------ Functions to create category and link it to user profile(KNOWS) ----- #
-
-    def __create_category(self, category):
+    def __check_category(self, category):
         with self.driver.session(database="neo4j") as session:
             result = session.execute_write(
-                self.__create_category_driver, category=category
+                self.__check_category_driver, category=category
             )
-            return [row for row in result]
+            return result
 
+    # ------ Functions to create category and link it to user profile(KNOWS) ----- #
     @staticmethod
     def __create_category_driver(tx, category):
         global user_profile
@@ -76,29 +69,18 @@ class App:
                 )
             )
 
-    def create_new_category(self, category):
-        # res = self.__check_category(category)
-        # if not res:
-        #     self.__create_category(category)
-        #     Logger.write_debug("Category created: ", category)
-        # else:
-        #     Logger.write_debug("Category already exists: ", category)
-        self.__create_category(category)
-        Logger.write_debug("Category created: " + str(category))
-
-    #!--------------------------------------------------------------------------------------------------
-
-    # ------- Functions to link topics to the Categories through sub-topics ------ #
-    def __create_topic_relation(self, topic, level, category_result):
+    def __create_category(self, category):
         with self.driver.session(database="neo4j") as session:
             result = session.execute_write(
-                self.__create_topic_relation_driver,
-                topic=topic,
-                level=level,
-                category_result=category_result,
+                self.__create_category_driver, category=category
             )
             return [row for row in result]
 
+    def create_new_category(self, category):
+        self.__create_category(category)
+        Logger.write_debug("Category created: " + str(category))
+
+    # ------- Functions to link topics to the Categories through sub-topics ------ #
     @staticmethod
     def __create_topic_relation_driver(tx, topic, level, category_result):
         global user_profile
@@ -137,59 +119,21 @@ class App:
                 continue
         return [row for row in result]
 
+    def __create_topic_relation(self, topic, level, category_result):
+        with self.driver.session(database="neo4j") as session:
+            result = session.execute_write(
+                self.__create_topic_relation_driver,
+                topic=topic,
+                level=level,
+                category_result=category_result,
+            )
+            return [row for row in result]
+
     def create_new_topic_relation(self, topic, level, categories_result):
         self.__create_topic_relation(topic, level, categories_result)
         Logger.write_debug("Topic created: " + str(topic) + " : " + str(level))
 
-    #!-------------------------------------------------------------------------------------------------
-
-    def __normalize_weights(self):
-        with self.driver.session(database="neo4j") as session:
-            result = session.execute_write(self.__normalize_weights_driver)
-            return
-
-    def __fetch_weights(self, category):
-        with self.driver.session(database="neo4j") as session:
-            result = session.execute_write(
-                self.__fetch_weights_driver, category=category
-            )
-            return result
-
-    def __fetch_profiles(self):
-        with self.driver.session(database="neo4j") as session:
-            result = session.execute_write(self.__fetch_profiles_driver)
-            return result
-
-    def __create_profile(self, name):
-        with self.driver.session(database="neo4j") as session:
-            result = session.execute_write(self.__create_profile_driver, name=name)
-            return result
-
-    def __delete_profile(self, name):
-        with self.driver.session(database="neo4j") as session:
-            result = session.execute_write(self.__delete_profile_driver, name=name)
-            return result
-
-    @staticmethod
-    def __create_profile_driver(tx, name):
-        query = """
-            MERGE (p:Profile{name:$name})
-        """
-
-        tx.run(query, name=name)
-
-    @staticmethod
-    def __fetch_profiles_driver(tx):
-        global user_profile
-
-        query = """
-           MATCH (p:Profile)
-           RETURN p.name as profileNames
-        """
-        result = tx.run(query)
-
-        profile_names = [record["profileNames"] for record in result]
-        return profile_names
+    # ---------------------- Functions to normalize weights ---------------------- #
 
     @staticmethod
     def __normalize_weights_driver(tx):
@@ -225,20 +169,16 @@ class App:
         result2 = tx.run(query_normalize_categories, name=user_profile)
         return [result1, result2]
 
+    def __normalize_weights(self):
+        with self.driver.session(database="neo4j") as session:
+            result = session.execute_write(self.__normalize_weights_driver)
+            return
+
     def normalize_weights(self):
         self.__normalize_weights()
         Logger.write_debug("Weights Normalized")
 
-    #!-------------------------------------------------------------------------------------------------
-
-    @staticmethod
-    def __delete_profile_driver(tx, name):
-        query = """
-        OPTIONAL MATCH (p:Profile{name:$name})-[r1:KNOWS]->(c:Category)-[r2:HAS]->(l:Level)<-[r3:BELONGSTO]-(t:Topic)
-            DETACH DELETE p, r1, c, r2, l, r3, t
-        """
-        tx.run(query, name=name)
-
+    # ------------------------ Functions to Fetch weights ------------------------ #
     @staticmethod
     def __fetch_weights_driver(tx, category):
         global user_profile
@@ -250,20 +190,70 @@ class App:
         Logger.write_debug("DATA " + str(records))
         return records
 
-    def assign_weights(self):
-        self.__assign_weights()
-        Logger.write_debug("Weights Assigned")
+    def __fetch_weights(self, category):
+        with self.driver.session(database="neo4j") as session:
+            result = session.execute_write(
+                self.__fetch_weights_driver, category=category
+            )
+            return result
 
     def fetch_weights(self, category):
         Logger.write_debug("Weights fetched : " + str(category))
         return self.__fetch_weights(category)
 
+    # ------------------------ Functions to fetch profiles ----------------------- #
+    @staticmethod
+    def __fetch_profiles_driver(tx):
+        global user_profile
+
+        query = """
+           MATCH (p:Profile)
+           RETURN p.name as profileNames
+        """
+        result = tx.run(query)
+
+        profile_names = [record["profileNames"] for record in result]
+        return profile_names
+
+    def __fetch_profiles(self):
+        with self.driver.session(database="neo4j") as session:
+            result = session.execute_write(self.__fetch_profiles_driver)
+            return result
+
     def fetch_profiles(self):
         return self.__fetch_profiles()
+
+    # ----------------------- Functions to create profiles ----------------------- #
+    @staticmethod
+    def __create_profile_driver(tx, name):
+        query = """
+            MERGE (p:Profile{name:$name})
+        """
+
+        tx.run(query, name=name)
+
+    def __create_profile(self, name):
+        with self.driver.session(database="neo4j") as session:
+            result = session.execute_write(self.__create_profile_driver, name=name)
+            return result
 
     def create_profile(self, name):
         self.__create_profile(name)
         Logger.write_debug("Profile created : " + name)
+
+    # ------------------------ Functions to delete profile ----------------------- #
+    @staticmethod
+    def __delete_profile_driver(tx, name):
+        query = """
+        OPTIONAL MATCH (p:Profile{name:$name})-[r1:KNOWS]->(c:Category)-[r2:HAS]->(l:Level)<-[r3:BELONGSTO]-(t:Topic)
+            DETACH DELETE p, r1, c, r2, l, r3, t
+        """
+        tx.run(query, name=name)
+
+    def __delete_profile(self, name):
+        with self.driver.session(database="neo4j") as session:
+            result = session.execute_write(self.__delete_profile_driver, name=name)
+            return result
 
     def delete_profile(self, name):
         self.__delete_profile(name)
@@ -332,4 +322,3 @@ def test_graph():
 
 if __name__ == "__main__":
     init_graph()
-    # test_graph()
