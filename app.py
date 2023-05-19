@@ -70,14 +70,20 @@ init_prompt = """
     \n
     [CONTEXT]:
     {
-    “Technology” : {
-    “confidence”:34.20,
-    “concepts”:['AI','Blockchain']
-    },
-    “Physics”: {
-                “confidence”: 12.45,
-                “concepts”:['Quantum Physics','Mechanics']
-    }	
+        "Technology": {
+            "confidence": 34.2,
+            "concepts": [
+                "AI",
+                "Blockchain"
+            ]
+        },
+        "Physics": {
+            "confidence": 12.45,
+            "concepts": [
+                "Quantum Physics",
+                "Mechanics"
+            ]
+        }
     }
     \n
     In this example, user wants his responses to have the context of 2 domains. They are Technology and Finance. About Technology, user's confidence score is about 34.20 and he knows about AI and blockchain. In Physics his confidence score is about 12.45 and he knows about Quantum Physics and Mechanics.
