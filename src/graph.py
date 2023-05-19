@@ -14,7 +14,6 @@ class App:
         self.driver.close()
 
     # ---------------- Functions to check if the category exists ---------------- #
-
     @staticmethod
     def __check_category_driver(tx, category):
         query = "MATCH (t:Category{name : $category})" "RETURN t"

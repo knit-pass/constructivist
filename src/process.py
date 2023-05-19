@@ -8,7 +8,6 @@ from .transformers import *
 nlp = spacy.load("en_core_web_sm")
 
 
-# Functions to process prompt
 def get_prompt_categories(prompt: str, threshold=50):
     return get_categories_cap(prompt, threshold)
 
@@ -18,6 +17,15 @@ def get_rank(prompt: str):
 
 
 def get_concepts(sentence):
+    """
+    The function takes a sentence as input, extracts noun phrases from it, filters out determiners, and
+    returns a list of lowercase noun phrases.
+
+    :param sentence: a string containing a sentence or text from which the function will extract noun
+    phrases as concepts
+    :return: The function `get_concepts` returns a list of noun phrases (concepts) extracted from the
+    input sentence, where each concept is represented as a string in lowercase.
+    """
     doc = nlp(sentence)
     noun_chunks = []
     for chunk in doc.noun_chunks:
@@ -30,6 +38,18 @@ def get_concepts(sentence):
 
 
 def get_response_categories(response: str, threshold=50):
+    """
+    This function updates a knowledge base with categories related to entities in a given response and
+    returns the categories.
+
+    :param response: The input response string for which we want to get the response categories
+    :type response: str
+    :param threshold: The threshold is a value used to filter out categories with low confidence scores.
+    Categories with confidence scores below the threshold percentage of the highest will not be included in the final prompt(optional)
+    :return: The function `get_response_categories` returns a dictionary `categories_result` which
+    contains the categories for each entity in the input `response` text, after updating the knowledge
+    base and normalizing weights.
+    """
     entities = get_concepts(response)
     categories_result = {}
     level = get_rank(response)
@@ -43,6 +63,16 @@ def get_response_categories(response: str, threshold=50):
 
 
 def fetch_category_data(prompt, threshold=50):
+    """
+    This function fetches category data based on a given prompt and threshold, and returns a dictionary
+    containing the confidence level and topic values for each category.
+
+    :param prompt: The prompt for which category data needs to be fetched
+    :param threshold: The threshold is a value used to filter out categories with low confidence scores.
+    Categories with confidence scores below the threshold percentage of the highest will not be included in the final prompt
+    :return: The function `fetch_category_data` returns a dictionary `data` containing the confidence
+    level and topic values for each category fetched from the prompt.
+    """
     categories_fetched = get_prompt_categories(prompt, threshold)
     weights = []
     data = {}
@@ -60,11 +90,21 @@ def fetch_category_data(prompt, threshold=50):
         except:
             data[i["Category"]][i["Level"]] = []
             data[i["Category"]][i["Level"]].append([i["Topic"], i["TopicValue"]])
-    # print("Data:: ", data)
     return data
 
 
 def create_prompt_data(prompt, threshold=50):
+    """
+    This function creates a final prompt by fetching category data and concepts based on a given prompt
+    and threshold.
+
+    :param prompt: The text prompt for which we want to create context data
+    :param threshold: The threshold is a value used to filter out categories with low confidence scores.
+    Categories with confidence scores below the threshold percentage of the highest will not be included in the final prompt
+    context. The default value is 50, defaults to 50 (optional)
+    :return: The function `create_prompt_data` returns a string that contains the context and prompt
+    data.
+    """
     # prompt_rank = get_rank(prompt)
     prompt_rank = 4
     category_data = fetch_category_data(prompt, threshold)
@@ -96,7 +136,6 @@ def create_prompt_data(prompt, threshold=50):
 
     final_prompt = ""
     final_prompt += "[CONTEXT]: \n"
-    # final_prompt += str(prompt_context)
     final_prompt += json.dumps(prompt_context, indent=4)
     final_prompt += "\n\n"
     final_prompt += "[PROMPT]: "
