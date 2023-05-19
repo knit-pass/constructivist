@@ -30,14 +30,17 @@ def get_concepts(sentence):
     input sentence, where each concept is represented as a string in lowercase.
     """
     doc = nlp(sentence)
-    noun_chunks = []
+    noun_chunks_set = set()
+    entities = [(entity.text, entity.label_) for entity in doc.ents]
     for chunk in doc.noun_chunks:
         if chunk.root.pos_ == "NOUN":
             filtered_chunk = " ".join(
                 token.text for token in chunk if token.pos_ != "DET"
             )
-            noun_chunks.append(filtered_chunk.lower())
-    return noun_chunks
+            noun_chunks_set.add(filtered_chunk.lower())
+    for entity in entities:
+        noun_chunks_set.add(entity.lower())
+    return list(noun_chunks_set)
 
 
 def get_response_categories(response: str, threshold=50):
