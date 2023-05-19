@@ -38,7 +38,7 @@ def get_concepts(sentence):
                 token.text for token in chunk if token.pos_ != "DET"
             )
             noun_chunks_set.add(filtered_chunk.lower())
-    for entity in entities:
+    for entity, label in entities:
         noun_chunks_set.add(entity.lower())
     return list(noun_chunks_set)
 
