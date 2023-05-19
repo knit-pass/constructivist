@@ -1,6 +1,6 @@
-from transformers import pipeline
 import json
 from .logger import *
+from transformers import pipeline
 
 pipe = pipeline(model="facebook/bart-large-mnli")
 

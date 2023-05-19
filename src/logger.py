@@ -36,7 +36,6 @@ class Logger:
     @staticmethod
     def write_debug(msg):
         logging.debug(msg)
-        # print("> DEBUG: ", msg)
 
     @staticmethod
     def write_print_debug(msg):
@@ -51,7 +50,6 @@ class Logger:
     @staticmethod
     def write_error(msg):
         logging.error(msg)
-        # print("> ERROR: ", msg)
 
     @staticmethod
     def write_print_error(msg):

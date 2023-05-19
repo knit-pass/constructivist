@@ -8,7 +8,7 @@ openai.api_key = creds["API_KEY"]
 first_time_run = False
 
 
-def beginFunction():
+def begin_app():
     global first_time_run
     print(
         "# ---------------------------------------------------------------------------- #"
@@ -43,14 +43,12 @@ def beginFunction():
         question = input("Enter prompt : ")
         if questionType == 1:
             final_prompt = create_prompt_data(question, 50)
-            modifiedQuestion = final_prompt
-            print("Modified Prompt : " + modifiedQuestion)
+            modified_question = final_prompt
+            print("Modified Prompt : " + modified_question)
 
         elif questionType == 2:
-            # solution = "This is a sample solution"
-            solution = giveAnswer(create_prompt_data(question))  # uses API key
+            solution = give_answer(create_prompt_data(question))  # uses API key
             result = get_response_categories(solution)
-            # print(type(solution))
 
             print(
                 "# ---------------------------------------------------------------------------- #"
@@ -97,7 +95,7 @@ init_prompt = """
 
 
 # this function uses API key to generate results
-def giveAnswer(message):
+def give_answer(message):
     messages = [
         {"role": "user", "content": "You are a intelligent assistant."},
         {"role": "assistant", "content": "Ok. Thank you."},
@@ -143,100 +141,5 @@ def giveAnswer(message):
     return reply
 
 
-def choose_profiles(choice=0) -> str:
-    if not choice:
-        print("Choose: ")
-        print("1. Create New Profile")
-        print("2. Use Existing Profile")
-        print("3. Delete Profile")
-        print("4. Exit")
-        print("Enter your choice: ")
-        choice = int(input())
-    profile = ""
-
-    available_profiles = app.fetch_profiles()
-    # function called from graph.py
-
-    # Create new profile
-    if choice == 1:
-        print("Enter the name of new profile: ")
-        profile = input()
-        if profile in available_profiles:
-            print("Duplicate profile!")
-            profile = choose_profiles(1)
-        print("The profile is: ", profile)
-
-        app.create_profile(profile)
-        # function called from graph.py
-
-        return profile
-    # Choose existing profile
-    elif choice == 2:
-        print("Available profiles: ")
-        # for i, idx in enumerate(available_profiles):
-        #     print(f"{idx+1}. i")
-        idx = 1
-        for i in available_profiles:
-            print(str(idx), " : ", i)
-            idx = idx + 1
-        print("Choose your profile: ")
-        profileIndex = int(input())
-        if profileIndex > len(available_profiles) or profileIndex < 0:
-            choose_profiles(2)
-        else:
-            # TODO: Choose profile logic
-            profile_name = available_profiles[profileIndex - 1]
-        print("The profile is: ", profile_name)
-        return profile_name
-    # Delete profile
-    elif choice == 3:
-        print("Available profiles to delete: ")
-        idx = 1
-        for i in available_profiles:
-            print(str(idx), " : ", i)
-            idx = idx + 1
-        print("Choose the profile to delete: ")
-        profileIndex = int(input())
-        if profileIndex > len(available_profiles) or profileIndex < 0:
-            print("Invalid option!")
-            return choose_profiles(3)
-        else:
-            profile_name = available_profiles[profileIndex - 1]
-            # TODO: Delete Logic
-            print("Are you sure you want to delete the entire data of : ", profile_name)
-            print("Y/N ?")
-            ack = input()
-            if ack == "Y" or ack == "y":
-                app.delete_profile(profile_name)
-                available_profiles = app.fetch_profiles()
-                return choose_profiles()
-            else:
-                return choose_profiles()
-
-    else:
-        print("Invalid option! ")
-        return choose_profiles()
-
-
-def init_new_profile(name: str = "") -> bool:
-    if name == "":
-        print("Invalid new profile!")
-        return False
-    print("How do you want to start a new profile")
-    print("1. Nothing")
-    print("2. Initial data")
-    print("Choose: ")
-    choice = int(input())
-
-    # Start with nothing
-    if choice == 1:
-        pass
-    # Start with a data
-    elif choice == 2:
-        pass
-    else:
-        return init_new_profile(name)
-
-
 if __name__ == "__main__":
-    beginFunction()
+    begin_app()

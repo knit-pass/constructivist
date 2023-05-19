@@ -4,7 +4,7 @@ from src import Logger
 
 def main():
     Logger.start_log()
-    beginFunction()
+    begin_app()
     Logger.end_log()
 
 
